@@ -41,13 +41,13 @@ class RNNModule(pl.LightningModule):
         if stage == 'fit':
             self.started_training = False
             self.val_evaluator = PropheseeEvaluator(dataset=self.full_config.dataset.name, 
-                                                downsample_by_2=self.full_config.dataset.val.downsample_by_factor_2)
+                                                downsample_by_2=self.full_config.dataset.downsample_by_factor_2)
             
             self.train_rnn_state = RNNStates()
             self.val_rnn_state = RNNStates()
         elif stage == 'test':
             self.test_evaluator = PropheseeEvaluator(dataset=self.full_config.dataset.name, 
-                                                downsample_by_2=self.full_config.dataset.test.downsample_by_factor_2)
+                                                downsample_by_2=self.full_config.dataset.downsample_by_factor_2)
             
             self.test_rnn_state = RNNStates()
         
