@@ -2,11 +2,11 @@ import torch
 import numpy as np
 
 def custom_collate_fn(batch):
-    # sequence_length と max_bboxes を動的に決定
-    sequence_length = max(len(sample['labels']) for sample in batch)
+    # batch内のサンプルに`labels`が空かどうか確認し、空であれば0を使用
+    sequence_length = max(len(sample['labels']) for sample in batch if sample['labels']) or 0
     max_bboxes = max(
-        max(len(time_step) for time_step in sample['labels'] if time_step is not None) 
-        for sample in batch
+        (max(len(time_step) for time_step in sample['labels'] if time_step is not None) 
+         for sample in batch if sample['labels']), default=0
     )
 
     # 各サンプルのデータを収集

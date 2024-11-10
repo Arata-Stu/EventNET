@@ -61,7 +61,7 @@ class DNNModule(pl.LightningModule):
         targets.requires_grad = False
 
         
-        loss = self(imgs, targets)
+        loss = self.model(imgs, targets)
         self.log('train_loss', loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
 
         return loss

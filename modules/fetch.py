@@ -5,8 +5,8 @@ from modules.model.dnn_module import DNNModule
 from modules.model.rnn_module import RNNModule
 
 
-def fetch_data_module(full_config: DictConfig) -> pl.LightningDataModule:
-    return DataModule(full_config)
+def fetch_data_module(config: DictConfig) -> pl.LightningDataModule:
+    return DataModule(config)
 
 
 def fetch_model_module(config: DictConfig) -> pl.LightningModule:
