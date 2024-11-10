@@ -14,7 +14,7 @@ class RVT(nn.Module):
         super().__init__()
 
         ###### Config ######
-        in_channels = mdl_config.input_channels
+        in_channels = mdl_config.input_dim
         embed_dim = mdl_config.embed_dim
         dim_multiplier_per_stage = tuple(mdl_config.dim_multiplier)
         num_blocks_per_stage = tuple(mdl_config.num_blocks)
