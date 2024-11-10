@@ -3,6 +3,7 @@ import numpy as np
 import torch
 from torch.utils.data import Dataset
 from typing import List, Optional, Dict
+import zipfile
 
 class SequenceDataset(Dataset):
     def __init__(self, data_dir: str, mode: str = 'train', sequence_length: int = 1,
@@ -31,11 +32,14 @@ class SequenceDataset(Dataset):
 
     def _has_label(self, idx: int) -> bool:
         data_file = self.data_files[idx]
-        with np.load(data_file, allow_pickle=True) as data:
-            if 'labels' not in data:
+        with zipfile.ZipFile(data_file) as z:
+            if 'labels.npy' in z.namelist():
+                # ラベルの存在を確認
+                with z.open('labels.npy') as label_file:
+                    labels = np.load(label_file, allow_pickle=True)
+                    return len(labels) > 0
+            else:
                 return False
-            labels = data['labels']
-        return len(labels) > 0
 
     def _get_start_indices(self) -> List[int]:
         indices = []

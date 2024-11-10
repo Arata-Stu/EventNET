@@ -16,22 +16,21 @@ def to_yolox(tensor, mode='train'):
     B, L, num_obj, info = tensor.shape
     assert info == 8, "入力テンソルのinfoは8でなければなりません"
 
+    # 各情報の抽出（timestamp, class_confidence, track_id は無視）
+    x = tensor[:, :, :, 1:2]  # x
+    y = tensor[:, :, :, 2:3]  # y
+    w = tensor[:, :, :, 3:4]  # width
+    h = tensor[:, :, :, 4:5]  # height
+    cls = tensor[:, :, :, 5:6]  # class_id
+
     if mode == 'train':
         # trainモードの時は (cls, cx, cy, w, h) のフォーマット
-        cls = tensor[:, :, :, 5:6]  # class_id
-        cx = tensor[:, :, :, 1:2]   # x
-        cy = tensor[:, :, :, 2:3]   # y
-        w = tensor[:, :, :, 3:4]    # w
-        h = tensor[:, :, :, 4:5]    # h
+        cx = x + w / 2  # 中心 x 座標
+        cy = y + h / 2  # 中心 y 座標
         output = torch.cat([cls, cx, cy, w, h], dim=-1)
         
     elif mode in ['test', 'val']:
         # testまたはvalモードの時は (x, y, w, h, cls) のフォーマット
-        x = tensor[:, :, :, 1:2]
-        y = tensor[:, :, :, 2:3]
-        w = tensor[:, :, :, 3:4]
-        h = tensor[:, :, :, 4:5]
-        cls = tensor[:, :, :, 5:6]
         output = torch.cat([x, y, w, h, cls], dim=-1)
     
     else:
