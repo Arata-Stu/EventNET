@@ -25,10 +25,10 @@ def main(model_config, exp_config, dataset_config):
     dataset_name = merged_conf.dataset.name
     model_name = merged_conf.model.name
     ev_representation = merged_conf.dataset.ev_representation
-    ev_delta_t = merged_conf.dataset.ev_delta_t
+    delta_t_ms = merged_conf.dataset.delta_t_ms
     
     # ev_representation と ev_delta_t を組み合わせたディレクトリ名
-    event_rep_dir = f"{ev_representation}-dt{ev_delta_t}"
+    event_rep_dir = f"{ev_representation}-dt{delta_t_ms}"
     
     # ディレクトリの階層構造を作成
     save_dir = os.path.join(base_save_dir, dataset_name, model_name, event_rep_dir, timestamp, 'train')
