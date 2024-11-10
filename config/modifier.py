@@ -17,7 +17,7 @@ def dynamically_modify_train_config(config: DictConfig):
         mdl_name = mdl_cfg.name
 
         #32の倍数になるようにheight widthを調整
-        partition_split_32 = mdl_cfg.partition_split_32
+        partition_split_32 = mdl_cfg.backbone.partition_split_32
         assert partition_split_32 in (1, 2, 4)
         multiple_of = 32 * partition_split_32
         mdl_hw = _get_modified_hw_multiple_of(hw=dataset_hw, multiple_of=multiple_of)
