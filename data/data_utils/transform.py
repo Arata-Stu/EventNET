@@ -65,6 +65,55 @@ class EventPadderTransform:
         sample['events'] = padded_event_frames
         sample['labels'] = labels_sequence  # ラベルは変更しない
         return sample
+    
+class LabelPaddingTransform:
+    def __init__(self, padding_shape=(1,), padding_value=0.):
+        """
+        ラベルのパディング設定
+        :param padding_shape: パディングするラベルの形状（デフォルトは(1,)）
+        :param padding_value: パディングする際の値（デフォルトは0.0）
+        """
+        self.padding_shape = padding_shape
+        self.padding_value = padding_value
+
+        # dtype を定義
+        self.dtype = np.dtype([
+            ('t', '<u8'), 
+            ('x', '<f4'), 
+            ('y', '<f4'), 
+            ('w', '<f4'), 
+            ('h', '<f4'), 
+            ('class_id', 'u1'), 
+            ('class_confidence', '<f4'), 
+            ('track_id', '<u4')
+        ])
+
+        # 単一のゼロ埋めパディングデータ
+        self.padding_label = np.array([(0, 0., 0., 0., 0., 0, 0., 0)], dtype=self.dtype)
+
+    def __call__(self, inputs):
+        labels = inputs['labels']
+        labels_list = []  # ラベルリストを初期化
+
+        # ラベルリストをループ処理
+        for label in labels:
+            if label is None:
+                # Noneの場合、単一のゼロ埋めデータを追加
+                labels_list.append(self.padding_label)
+            else:
+                # Noneでない場合はそのままリストに追加
+                labels_list.append(label)
+
+        outputs = {
+            'events': inputs['events'],  # eventsデータはそのまま
+            'labels': labels_list,       # パディングされたlabelsリストを挿入
+            'file_paths': inputs['file_paths'],
+            'timestamps': inputs['timestamps'],
+            'is_start_sequence': inputs['is_start_sequence'],
+            'mask': inputs['mask']
+        }
+        
+        return outputs
 
 def flip_horizontal(image, labels):
     """
