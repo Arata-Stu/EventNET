@@ -54,11 +54,12 @@ class DNNModule(pl.LightningModule):
         self.started_training = True
         self.model.train()
         imgs = batch['events'][:, 0].to(dtype=self.dtype)  
-        labels = batch['labels'][:, 0]
+        labels = batch['labels']
         labels.requires_grad = False
 
-        targets = to_yolox(tensor = labels, mode='train').to(dtype=self.dtype)  
+        targets = to_yolox(tensor = labels, mode='train')[: 0].to(dtype=self.dtype)  
         targets.requires_grad = False
+
         
         loss = self(imgs, targets)
         self.log('train_loss', loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
@@ -77,10 +78,10 @@ class DNNModule(pl.LightningModule):
         self.model.eval()
         
         imgs = batch['events'][:, 0].to(dtype=self.dtype)  
-        labels = batch['labels'][:, 0]
+        labels = batch['labels']
         timestamps = batch['timestamps'][:, -1]
         labels.requires_grad = False
-        targets = to_yolox(tensor = labels, mode='val').to(dtype=self.dtype)  
+        targets = to_yolox(tensor = labels, mode='val')[:, 0].to(dtype=self.dtype)  
         targets.requires_grad = False
 
         preds = self.model(imgs)
@@ -113,10 +114,10 @@ class DNNModule(pl.LightningModule):
         self.model.eval()
         
         imgs = batch['events'][:, 0].to(dtype=self.dtype)  
-        labels = batch['labels'][:, 0]
+        labels = batch['labels']
         timestamps = batch['timestamps'][:, -1]
         labels.requires_grad = False
-        targets = to_yolox(tensor = labels, mode='val').to(dtype=self.dtype)  
+        targets = to_yolox(tensor = labels, mode='val')[:, 0].to(dtype=self.dtype)  
         targets.requires_grad = False
 
         preds = self.model(imgs)
