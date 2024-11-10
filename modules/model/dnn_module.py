@@ -57,7 +57,7 @@ class DNNModule(pl.LightningModule):
         labels = batch['labels']
         labels.requires_grad = False
 
-        targets = to_yolox(tensor = labels, mode='train')[: 0].to(dtype=self.dtype)  
+        targets = to_yolox(tensor = labels, mode='train')[: , 0].to(dtype=self.dtype)  
         targets.requires_grad = False
 
         
