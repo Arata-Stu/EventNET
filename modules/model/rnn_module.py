@@ -4,7 +4,7 @@ import pytorch_lightning as pl
 from functools import partial
 from omegaconf import DictConfig
 
-from models.model import RNNModel
+from models.model import build_model
 from modules.utils.rnn_state import RNNStates
 from utils.eval.prophesee.evaluator import PropheseeEvaluator
 from utils.eval.prophesee.io.box_loading import to_prophesee
@@ -26,7 +26,7 @@ class RNNModule(pl.LightningModule):
             self.height, self.width = 360, 640
         
         self.classes = CLASSES  # クラスを保持
-        self.model = RNNModel(model_config=full_config.model)
+        self.model = build_model(model_config=full_config.model)
 
         self.post_process = partial(postprocess,
                                     num_classes=full_config.model.head.num_classes,

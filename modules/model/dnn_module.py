@@ -4,7 +4,7 @@ import pytorch_lightning as pl
 from functools import partial
 from omegaconf import DictConfig
 
-from models.model import DNNModel
+from models.model import build_model
 from utils.eval.prophesee.evaluator import PropheseeEvaluator
 from utils.yolox_utils import to_yolox, postprocess
 from utils.eval.prophesee.io.box_loading import to_prophesee
@@ -25,7 +25,7 @@ class DNNModule(pl.LightningModule):
             self.height, self.width = 360, 640
         
         self.classes = CLASSES  # クラスを保持
-        self.model = DNNModel(model_config=full_config.model)
+        self.model = build_model(model_config=full_config.model)
 
         self.post_process = partial(postprocess,
                                     num_classes=full_config.model.head.num_classes,
