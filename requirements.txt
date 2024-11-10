@@ -1,0 +1,32 @@
+opencv-python
+numpy
+numba
+scikit-learn
+
+torch
+torchvision
+pytorch_lightning
+
+tensorboard
+matplotlib
+
+pyyaml
+omegaconf
+h5py
+hdf5plugin
+typeguard
+
+#yolox
+loguru
+
+#rvt
+StrEnum
+einops
+
+#eval
+pycocotools
+
+## NVIDIA GPU
+# tensorRT
+# pycuda
+# onnx

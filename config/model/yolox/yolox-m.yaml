@@ -1,0 +1,34 @@
+model:
+  name: 'yolox-m'
+  type: 'dnn'
+  partition_split_32: 1
+  
+  backbone:
+    name: 'darknet'
+    depth: 0.67
+    width: 0.75
+    input_dim: ???
+    out_features: ["dark3", "dark4", "dark5"] #choose darknet outputs 'stem', 'dark 2 ~ 5'
+    depthwise: false
+    act: "silu"
+  
+  neck:
+    name: 'pafpn'
+    depth: 0.67
+    in_stages: ["dark3", "dark4", "dark5"]
+    in_channels: ???
+    depthwise: false
+    act: "silu"
+
+
+  head:
+    name: 'yolox'
+    num_classes: ???
+    strides: ???
+    in_channels: ???
+    act: "silu"
+    depthwise: false
+
+  postprocess:
+    conf_thre: 0.1
+    nms_thre: 0.45

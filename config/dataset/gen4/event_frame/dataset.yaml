@@ -1,0 +1,26 @@
+dataset:
+  name: gen4
+  data_dir: './datasets/pre_gen4'
+  orig_size: [360, 640]
+  target_size: ???
+  downsample_by_factor_2: true
+
+
+  tau_ms: 50
+  delta_t_ms: 50
+
+  train:
+    sequence_length: 21
+    guarantee_labels: true
+   
+    
+
+  val:
+    sequence_length: 21
+    guarantee_labels: false
+    
+
+  test:
+    sequence_length: 21
+    guarantee_labels: false
+    
