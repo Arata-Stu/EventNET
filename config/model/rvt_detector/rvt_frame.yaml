@@ -8,7 +8,7 @@ model:
       enable: false
       args:
         mode: reduce-overhead
-    input_channels: 3
+    input_dim: ???
     enable_masking: true
     partition_split_32: 1
     embed_dim: 32 # tiny: 32, s: 48, base: 64

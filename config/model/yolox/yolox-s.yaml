@@ -1,13 +1,13 @@
 model:
   name: 'yolox-s'
   type: 'dnn'
-  partition_split_32: 1
   
   backbone:
     name: 'darknet'
     depth: 0.33
     width: 0.5
     input_dim: ???
+    partition_split_32: 1
     out_features: ["dark3", "dark4", "dark5"] #choose darknet outputs 'stem', 'dark 2 ~ 5'
     depthwise: false
     act: "silu"
