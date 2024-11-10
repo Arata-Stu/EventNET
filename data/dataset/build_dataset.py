@@ -1,7 +1,7 @@
 from omegaconf import DictConfig
 from torchvision import transforms
 
-from data.data_utils.transform import RandomSpatialAugmentor, EventPadderTransform
+from data.data_utils.transform import RandomSpatialAugmentor, EventPadderTransform, LabelPaddingTransform
 from .genx.build_dataset import build_prophesee_dataset
 
 def make_transform(dataset_config: DictConfig, mode: str = 'train'):
@@ -18,14 +18,15 @@ def make_transform(dataset_config: DictConfig, mode: str = 'train'):
     )
 
     height, width = dataset_config.target_size
-    padding = EventPadderTransform(target_height=height, target_width=width)
+    event_padding = EventPadderTransform(target_height=height, target_width=width)
+    label_padding = LabelPaddingTransform()
 
     if mode == 'train':
-        transform = [augment, padding]
+        transform = [augment, event_padding, label_padding]
     elif mode == 'val':
-        transform = [padding]
+        transform = [event_padding, label_padding]
     elif mode == 'test':
-        transform = [padding]
+        transform = [event_padding, label_padding]
 
     return transforms.Compose([t for t in transform if t is not None])
 
