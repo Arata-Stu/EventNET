@@ -50,6 +50,7 @@ def build_head(head_config: DictConfig, in_channels, strides):
             act=head_config.act, 
             depthwise=head_config.depthwise  
         )
+        head.initialize_biases(prior_prob=0.01)
     else:
         NotImplementedError
 
