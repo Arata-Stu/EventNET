@@ -6,7 +6,7 @@ dataset:
   downsample_by_factor_2: false
 
   ev_representation: event_frame
-  tau_ms: 50
+  tau_ms: 100
   delta_t_ms: 50
 
   augmentation:
@@ -29,16 +29,16 @@ dataset:
             max: 1.2
 
   train:
-    sequence_length: 21
+    sequence_length: 1
     guarantee_labels: true
     
     
   val:
-    sequence_length: 21
+    sequence_length: 1
     guarantee_labels: false
     
    
   test:
-    sequence_length: 21
+    sequence_length: 1
     guarantee_labels: false
     
