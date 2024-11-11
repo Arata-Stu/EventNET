@@ -14,8 +14,10 @@ class YOLOX(nn.Module):
         self.backbone = build_backbone(backbone_config=backbone_config)
 
         in_channels = self.backbone.get_stage_dims(neck_config.in_stages)
+        print('neck input channels', in_channels)
         self.neck = build_neck(neck_config=neck_config, in_channels=in_channels)
         strides = self.backbone.get_strides(neck_config.in_stages)
+        print('head strides', strides)
         self.head = build_head(head_config=head_config, in_channels=in_channels, strides=strides)
 
     def forward(self, x, targets=None):
