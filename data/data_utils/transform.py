@@ -319,9 +319,6 @@ def zoom_in(image, labels, zoom_factor, center=None):
             label['w'] *= zoom_factor
             label['h'] *= zoom_factor
 
-        # バウンディングボックスをクリップ
-        zoomed_labels = clip_bboxes(zoomed_labels, (H, W))
-        zoomed_labels = remove_flat_labels(zoomed_labels)
     else:
         zoomed_labels = None
 
@@ -368,9 +365,6 @@ def zoom_out(image, labels, zoom_factor, center=None):
             label['w'] /= zoom_factor
             label['h'] /= zoom_factor
 
-        # バウンディングボックスをクリップ
-        zoomed_labels = clip_bboxes(zoomed_labels, (H, W))
-        zoomed_labels = remove_flat_labels(zoomed_labels)
     else:
         zoomed_labels = None
 
