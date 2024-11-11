@@ -37,6 +37,7 @@ def dynamically_modify_train_config(config: DictConfig):
             'dsec': 8
         }
         mdl_cfg.head.num_classes = class_len_map[dataset_name]
+        print('num_class', mdl_cfg.head.num_classes)
 
 
         if 'rvt' in mdl_name:  # 'rvt' が含まれているかどうかで判定

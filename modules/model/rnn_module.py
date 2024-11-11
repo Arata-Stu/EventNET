@@ -65,6 +65,7 @@ class RNNModule(pl.LightningModule):
         sequence_timestamps = batch['timestamps']
         is_first_sample = batch['is_start_sequence']  # list[] * batch
         sequence_is_padded_mask = batch['mask']  # [batch, sequence_len]
+        
 
         sequence_targets = to_yolox(sequence_labels, mode='train')
         
@@ -129,7 +130,6 @@ class RNNModule(pl.LightningModule):
 
             return loss
         else:
-            print("No valid data for detection.")
             return None
 
 
@@ -149,6 +149,11 @@ class RNNModule(pl.LightningModule):
         sequence_timestamps = batch['timestamps']
         is_first_sample = batch['is_start_sequence']  # list[] * batch
         sequence_is_padded_mask = batch['mask']  # [batch, sequence_len]
+
+        if sequence_labels.shape[2] == 0:
+        
+            return  # ラベルが空の場合はスキップ
+    
 
         sequence_targets = to_yolox(sequence_labels, mode='val')
 
@@ -248,6 +253,10 @@ class RNNModule(pl.LightningModule):
         sequence_timestamps = batch['timestamps']
         is_first_sample = batch['is_start_sequence']  # list[] * batch
         sequence_is_padded_mask = batch['mask']  # [batch, sequence_len]
+
+        if sequence_labels.shape[2] == 0:
+        
+            return  # ラベルが空の場合はスキップ
 
         sequence_targets = to_yolox(sequence_labels, mode='test')
 
