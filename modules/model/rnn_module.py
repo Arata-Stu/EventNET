@@ -177,7 +177,7 @@ class RNNModule(pl.LightningModule):
             
             # 時系列データをRNNに渡す
             backbone_features, states = self.model.forward_backbone(
-                x=events, previous_states=prev_states, token_mask=token_mask
+                x=events, previous_states=prev_states, token_mask=None
             )
             prev_states = states
             
@@ -280,7 +280,7 @@ class RNNModule(pl.LightningModule):
             
             # 時系列データをRNNに渡す
             backbone_features, states = self.model.forward_backbone(
-                x=events, previous_states=prev_states, token_mask=token_mask
+                x=events, previous_states=prev_states, token_mask=None
             )
             prev_states = states
             
