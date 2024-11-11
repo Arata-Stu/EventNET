@@ -107,7 +107,6 @@ class LabelPaddingTransform:
         outputs = {
             'events': inputs['events'],  # eventsデータはそのまま
             'labels': labels_list,       # パディングされたlabelsリストを挿入
-            'file_paths': inputs['file_paths'],
             'timestamps': inputs['timestamps'],
             'is_start_sequence': inputs['is_start_sequence'],
             'mask': inputs['mask']

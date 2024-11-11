@@ -12,7 +12,6 @@ def custom_collate_fn(batch):
     # 各サンプルのデータを収集
     event_frames = [torch.stack([frame.clone().detach() for frame in sample['events']]) for sample in batch]
     labels = [sample['labels'] for sample in batch]
-    file_paths = [sample['file_paths'] for sample in batch]
     is_start_sequence = [sample['is_start_sequence'] for sample in batch]
     masks = [sample['mask'].clone().detach().to(dtype=torch.int64) for sample in batch]
     timestamps = [sample['timestamps'] for sample in batch]
@@ -47,7 +46,6 @@ def custom_collate_fn(batch):
     return {
         'events': event_frames,
         'labels': padded_labels,
-        'file_paths': file_paths,
         'timestamps': torch.stack([ts.clone().detach() for ts in timestamps]),  
         'is_start_sequence': is_start_sequence,
         'mask': masks
