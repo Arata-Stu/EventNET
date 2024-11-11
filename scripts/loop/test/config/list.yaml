@@ -1,0 +1,5 @@
+# config_list.yaml
+ckpt_paths:
+  - path/to/checkpoint1.ckpt
+  - path/to/checkpoint2.ckpt
+  - path/to/checkpoint3.ckpt

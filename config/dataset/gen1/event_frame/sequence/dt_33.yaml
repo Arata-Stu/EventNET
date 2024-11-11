@@ -1,0 +1,44 @@
+dataset:
+  name: gen1
+  data_dir: './datasets/gen1_pre'
+  orig_size: [240, 304]
+  target_size: ???
+  downsample_by_factor_2: false
+
+  ev_representation: event_frame
+  tau_ms: 50
+  delta_t_ms: 33
+
+  augmentation:
+      prob_hflip: 0.5
+      rotate:
+        prob: 0.8
+        min_angle_deg: -6
+        max_angle_deg: 6
+      zoom:
+        prob: 0.8
+        zoom_in:
+          weight: 8
+          factor:
+            min: 1.0
+            max: 1.5
+        zoom_out:
+          weight: 2
+          factor:
+            min: 1
+            max: 1.2
+
+  train:
+    sequence_length: 21
+    guarantee_labels: true
+    
+    
+  val:
+    sequence_length: 21
+    guarantee_labels: false
+    
+   
+  test:
+    sequence_length: 21
+    guarantee_labels: false
+    

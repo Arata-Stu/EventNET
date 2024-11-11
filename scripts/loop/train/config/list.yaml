@@ -1,0 +1,12 @@
+# config_list.yaml
+model_configs:
+  - "./config/model/yolox/yolox-s.yaml"
+
+exp_configs:
+  - "./config/experiment/single/train.yaml"
+
+dataset_configs:
+  - "./config/dataset/gen1/event_frame/single/dt_10.yaml"
+  - "./config/dataset/gen1/event_frame/single/dt_20.yaml"
+  - "./config/dataset/gen1/event_frame/single/dt_33.yaml"
+  - "./config/dataset/gen1/event_frame/single/dt_50.yaml"
