@@ -7,6 +7,7 @@ import yaml
 from multiprocessing import Pool, cpu_count, get_context
 import argparse
 import json
+import time
 
 # イベントフレームの生成関数
 def create_event_frame(slice_events, frame_shape):
@@ -170,4 +171,10 @@ if __name__ == '__main__':
     with open(args.config, 'r') as f:
         config = yaml.safe_load(f)
 
+    start_time = time.time()
+
     main(config)
+
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+    print(f"逐次処理の完了時間: {elapsed_time:.2f} 秒")
