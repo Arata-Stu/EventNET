@@ -3,6 +3,7 @@ from torchvision import transforms
 
 from data.data_utils.transform import RandomSpatialAugmentor, EventPadderTransform, LabelPaddingTransform
 from .genx.build_dataset import build_prophesee_dataset
+from .dsec.detection.build_dataset import build_dsec_dataset
 
 def make_transform(dataset_config: DictConfig, mode: str = 'train'):
     aug_config = dataset_config.augmentation
@@ -36,7 +37,8 @@ def build_dataset(dataset_config: DictConfig, mode: str = 'train'):
 
     if 'gen' in name:
         dataset = build_prophesee_dataset(dataset_config=dataset_config, mode=mode, transform=transform)
-
+    elif 'dsec' in name:
+        dataset = build_dsec_dataset(dataset_config=dataset_config, mode=mode, transform=transform)
     else:
         print(f'{name=} not available')
         raise NotImplementedError
