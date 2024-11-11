@@ -6,6 +6,7 @@ from tqdm import tqdm
 import yaml
 from multiprocessing import Pool, cpu_count, get_context
 import argparse
+import json
 
 # イベントフレームの生成関数
 def create_event_frame(slice_events, frame_shape):
@@ -36,6 +37,9 @@ def process_sequence(args):
     event_path = os.path.join(data_dir, seq, 'events', 'left', 'events.h5')
     detection_path = os.path.join(data_dir, seq, 'object_detections', 'left', 'tracks.npy')
 
+    # インデックスリストの初期化
+    index_list = []
+
     # イベントデータの読み込み
     with h5py.File(event_path, 'r') as f:
         t_offset = f['t_offset'][()]
@@ -61,10 +65,6 @@ def process_sequence(args):
             ('track_id', 'int32')
         ])
 
-    # タイムスタンプの単位を確認（マイクロ秒であることを前提とします）
-    events['t'] = events['t'].astype(np.float64)
-    detections['t'] = detections['t'].astype(np.float64)
-
     os.makedirs(seq_output_dir, exist_ok=True)
     start_time = events['t'][0]
     end_time = events['t'][-1]
@@ -76,10 +76,14 @@ def process_sequence(args):
         start_idx = np.searchsorted(events['t'], start_range)
         end_idx = np.searchsorted(events['t'], end)
 
-        output_file = os.path.join(seq_output_dir, f"{int(start)}_to_{int(end)}.npz")
-        if os.path.exists(output_file):
+        timestamp_str = f"{int(start)}_to_{int(end)}"
+        event_file_name = os.path.join(seq_output_dir, f"{timestamp_str}_event.npz")
+        label_file_name = os.path.join(seq_output_dir, f"{timestamp_str}_label.npz")
+
+        if os.path.exists(event_file_name) and os.path.exists(label_file_name):
             continue
 
+        # イベントスライスを生成
         slice_events = {
             't': events['t'][start_idx:end_idx],
             'x': events['x'][start_idx:end_idx],
@@ -87,13 +91,17 @@ def process_sequence(args):
             'p': events['p'][start_idx:end_idx],
         }
 
+        # イベントフレームを生成
         event_frame = create_event_frame(slice_events, frame_shape)
 
+        # イベントフレームを保存
+        np.savez_compressed(event_file_name, events=event_frame)
+
         if detections.size > 0:
-            # タイムウィンドウ内の検出データをすべて取得
+            # タイムウィンドウ内の検出データを取得
             det_mask = (detections['t'] >= start_range) & (detections['t'] < end)
             slice_detections = detections[det_mask]
-            
+
             labels = []
             unique_track_ids = np.unique(slice_detections['track_id'])
             
@@ -112,12 +120,29 @@ def process_sequence(args):
                     'class_confidence': latest_detection['class_confidence'],
                     'track_id': latest_detection['track_id']
                 })
+
+            # ラベルを圧縮保存
+            np.savez_compressed(label_file_name, labels=labels)
+            has_label = True
         else:
             labels = []
+            has_label = False
+            label_file_name = None  # ラベルがない場合
 
-        np.savez(output_file, event=event_frame, labels=labels)
+        # インデックスにエントリ追加
+        index_entry = {
+            'event_file': event_file_name,
+            'label_file': label_file_name,
+            'timestamp': (int(start), int(end))
+        }
+        index_list.append(index_entry)
 
-    print(f"end sequence: {seq}")
+    # インデックスファイルをJSON形式で保存
+    index_file_path = os.path.join(seq_output_dir, 'index.json')
+    with open(index_file_path, 'w') as index_file:
+        json.dump(index_list, index_file)
+
+    print(f"Completed processing sequence: {seq}")
 
 # メイン処理
 def main(config):
