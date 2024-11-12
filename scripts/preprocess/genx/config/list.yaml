@@ -1,0 +1,10 @@
+base_config: ./config/gen1.yaml
+parameters:
+  - delta_t_ms: 10
+    tau_ms: 100
+  - delta_t_ms: 20
+    tau_ms: 100
+  - delta_t_ms: 33
+    tau_ms: 100
+  - delta_t_ms: 50
+    tau_ms: 100
