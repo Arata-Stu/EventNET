@@ -23,6 +23,10 @@ class DNNModule(pl.LightningModule):
         elif self.full_config.dataset.name == "gen4":
             from data.dataset.genx.classes import GEN4_CLASSES as CLASSES
             self.height, self.width = 360, 640
+        elif self.full_config.dataset.name == "dsec":
+            from data.dataset.dsec.detection.classes import CLASSES as CLASSES
+            self.height, self.width = 480, 640
+        
         
         self.classes = CLASSES  # クラスを保持
         self.model = build_model(model_config=full_config.model)
