@@ -2,9 +2,10 @@ dataset:
   name: dsec
   data_dir: './datasets/dsec-det'
 
-  config_path: '/path/to/split.yaml'
-  orig_size: [240, 304]
+  split_config: './data/dataset/dsec/detection/split.yaml'
+  orig_size: [480, 640]
   target_size: ???
+  downsample_by_factor_2: false
 
   ev_representation: event_frame
   tau_ms: 50
@@ -30,16 +31,16 @@ dataset:
             max: 1.2
 
   train:
-    sequence_length: 1
+    sequence_length: 21
     guarantee_labels: true
     
     
   val:
-    sequence_length: 1
+    sequence_length: 21
     guarantee_labels: false
     
    
   test:
-    sequence_length: 1
+    sequence_length: 21
     guarantee_labels: false
     

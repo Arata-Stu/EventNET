@@ -19,7 +19,7 @@ class SequenceDataset(Dataset):
 
         # ラベルが保証されている場合、ラベルが存在するエントリのみをフィルタリング
         if self.guarantee_label:
-            self.index_entries = [entry for entry in self.index_entries if entry['label_file'] is not None]
+            self.index_entries = [entry for entry in self.index_entries if entry.get('label_file') is not None]
 
         # タイムスタンプでソート
         self.index_entries.sort(key=lambda x: x['timestamp'][0])
@@ -28,18 +28,23 @@ class SequenceDataset(Dataset):
         self.start_indices = self._get_start_indices()
 
     def _load_index_files(self) -> List[Dict[str, str]]:
-        """ディレクトリ内の全てのindex.jsonファイルからデータをロードする"""
+        """ディレクトリ構成の違いに対応できるように再帰的にindex.jsonファイルを探索してデータをロードする"""
         index_entries = []
         for root, _, files in os.walk(self.data_dir):
             if 'index.json' in files:
                 index_path = os.path.join(root, 'index.json')
                 with open(index_path, 'r') as f:
                     entries = json.load(f)
+                    # ディレクトリ構成に合わせてパスを補完する場合、以下のように設定
+                    for entry in entries:
+                        entry['event_file'] = os.path.join(root, entry['event_file'])
+                        if entry.get('label_file'):
+                            entry['label_file'] = os.path.join(root, entry['label_file'])
                     index_entries.extend(entries)
         return index_entries
 
     def _has_label(self, idx: int) -> bool:
-        return self.index_entries[idx]['label_file'] is not None
+        return self.index_entries[idx].get('label_file') is not None
 
     def _get_start_indices(self) -> List[int]:
         indices = []
@@ -80,7 +85,7 @@ class SequenceDataset(Dataset):
                 frames.append(torch.from_numpy(event_frame).permute(2, 0, 1))
 
             # ラベルを読み込む（存在しない場合は空のリスト）
-            if entry['label_file'] and os.path.exists(entry['label_file']):
+            if entry.get('label_file') and os.path.exists(entry['label_file']):
                 with np.load(entry['label_file'], allow_pickle=True) as data:
                     labels = data['labels']
             else:

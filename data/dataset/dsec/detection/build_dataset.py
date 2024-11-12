@@ -18,4 +18,4 @@ def build_dsec_dataset(dataset_config: DictConfig, mode: str = 'train', transfor
                                   sequence_length=mode_config.sequence_length,
                                   guarantee_label=mode_config.guarantee_labels,
                                   transform=transform,
-                                  config_path=dataset_config.config_path)
+                                  config_path=dataset_config.split_config)
