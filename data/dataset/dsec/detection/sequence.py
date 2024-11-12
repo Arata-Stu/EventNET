@@ -49,19 +49,38 @@ class SequenceDataset(Dataset):
     def _get_start_indices(self) -> List[int]:
         indices = []
         total_entries = len(self.index_entries)
-        for idx in range(0, total_entries, self.sequence_length):
-            end_idx = idx + self.sequence_length
-            if end_idx > total_entries:
-                if self.padding == 'truncate':
-                    continue
-                elif self.padding == 'pad' or self.padding == 'ignore':
-                    end_idx = total_entries
-            if self.guarantee_label:
-                has_label = any(self._has_label(i) for i in range(idx, end_idx))
+        idx = 0  # インデックスをシーケンス長ごとに増加させるための初期値
+
+        if self.guarantee_label:
+            while idx < total_entries:
+                end_idx = idx + self.sequence_length
+                if end_idx > total_entries:
+                    if self.padding == 'truncate':
+                        break
+                    elif self.padding == 'pad' or self.padding == 'ignore':
+                        end_idx = total_entries
+
+                # シーケンス内に少なくとも1つのラベルがあるか確認
+                has_label = any(
+                    self.index_entries[i]['label_file'] is not None
+                    for i in range(idx, end_idx)
+                )
                 if has_label:
                     indices.append(idx)
-            else:
+                # シーケンスがラベルを含んでいるかにかかわらず、インデックスをシーケンス長分だけ進める
+                idx += self.sequence_length
+
+        else:
+            # ラベルを保証しない場合は、シーケンス長分ずつインデックスを進める
+            for idx in range(0, total_entries, self.sequence_length):
+                end_idx = idx + self.sequence_length
+                if end_idx > total_entries:
+                    if self.padding == 'truncate':
+                        continue
+                    elif self.padding == 'pad' or self.padding == 'ignore':
+                        end_idx = total_entries
                 indices.append(idx)
+
         return indices
 
     def __len__(self):
