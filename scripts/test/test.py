@@ -1,5 +1,6 @@
-import yaml
-import argparse
+import sys
+sys.path.append('./../../')
+
 from omegaconf import OmegaConf
 from config.modifier import dynamically_modify_train_config
 from modules.fetch import fetch_data_module, fetch_model_module
@@ -8,7 +9,7 @@ import torch
 import pytorch_lightning as pl
 from pytorch_lightning import loggers as pl_loggers
 import os
-
+import argparse
 
 def get_config_paths_from_ckpt(ckpt_path):
     # ckpt_pathからベースディレクトリを取得
@@ -21,7 +22,7 @@ def get_config_paths_from_ckpt(ckpt_path):
     
     return config_path, train_dir
 
-def test(ckpt_path):
+def main(ckpt_path):
     # 設定ファイルとベースディレクトリを取得
     config_path, train_dir = get_config_paths_from_ckpt(ckpt_path)
 
@@ -60,19 +61,14 @@ def test(ckpt_path):
 
     # モデルのテストを実行
     trainer.test(model, datamodule=data)
-# 引数を解析
-parser = argparse.ArgumentParser(description="Testing loop with multiple checkpoint paths")
-parser.add_argument("--config", type=str, required=True, help="Path to the ckpt_paths.yaml file containing checkpoint paths list")
-args = parser.parse_args()
 
-# 指定された YAML ファイルを読み込む
-with open(args.config, 'r') as file:
-    config_list = yaml.safe_load(file)
+if __name__ == '__main__':
+    # argparseでコマンドライン引数を取得
+    parser = argparse.ArgumentParser(description="Model testing script")
+    parser.add_argument('--ckpt_path', type=str, required=True, help="Path to the checkpoint file")
+    
+    # 引数をパース
+    args = parser.parse_args()
 
-# ckpt_paths のリストを取得
-ckpt_paths = config_list['ckpt_paths']
-
-# 各 ckpt_path をループしてテスト実行
-for ckpt_path in ckpt_paths:
-    print(f"Testing with checkpoint: {ckpt_path}")
-    test(ckpt_path)
+    # ckpt_pathをmainに渡す
+    main(args.ckpt_path)

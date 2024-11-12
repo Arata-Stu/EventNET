@@ -1,5 +1,5 @@
-from itertools import product
-import argparse
+import sys
+sys.path.append('./../../')
 
 import yaml
 from omegaconf import OmegaConf
@@ -11,9 +11,10 @@ from pytorch_lightning.callbacks import ModelCheckpoint, LearningRateMonitor
 from pytorch_lightning import loggers as pl_loggers
 import os
 import datetime
+import argparse
 
-def train(model_config, exp_config, dataset_config):
-    base_save_dir = './result'
+def main(model_config, exp_config, dataset_config):
+    base_save_dir = './../result'
     
     # 実行時のタイムスタンプを付与して、一意のディレクトリ名を生成
     timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
@@ -87,22 +88,11 @@ def train(model_config, exp_config, dataset_config):
     # モデルの学習を実行
     trainer.fit(model, datamodule=data)
 
-# 引数を解析
-parser = argparse.ArgumentParser(description="Training loop with multiple configuration combinations")
-parser.add_argument("--config", type=str, required=True, help="Path to the list.yaml file containing config file lists")
-args = parser.parse_args()
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Train a model with specified YAML config files')
+    parser.add_argument('--model', type=str, required=True, help='Path to model configuration file')
+    parser.add_argument('--exp', type=str, required=True, help='Path to experiment configuration file')
+    parser.add_argument('--dataset', type=str, required=True, help='Path to dataset configuration file')
 
-# 指定された YAML ファイルを読み込む
-with open(args.config, 'r') as file:
-    config_list = yaml.safe_load(file)
-
-# 各設定ファイルのパスを取得
-model_configs = config_list['model_configs']
-exp_configs = config_list['exp_configs']
-dataset_configs = config_list['dataset_configs']
-
-# すべての組み合わせをループ
-for model_config, exp_config, dataset_config in product(model_configs, exp_configs, dataset_configs):
-    print(f"Training with model config: {model_config}, experiment config: {exp_config}, dataset config: {dataset_config}")
-    # 各組み合わせで train.py の main 関数を呼び出し、新規トレーニングを実行
-    train(model_config, exp_config, dataset_config)
+    args = parser.parse_args()
+    main(args.model, args.exp, args.dataset)
