@@ -1,7 +1,7 @@
 mode: gen4
 
 input_dir: "/path/to/dataset/gen4/"
-output_dir: "/path/to/dataset/gen4_pre/"
+output_dir: "/path/to/dataset/pre_gen4/"
 num_processors: 2
 
 tau_ms: 50       # イベントを取得する間隔（ミリ秒）
