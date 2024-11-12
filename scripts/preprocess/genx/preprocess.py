@@ -4,6 +4,7 @@ import hdf5plugin
 import numpy as np
 from tqdm import tqdm
 from multiprocessing import Pool, cpu_count, get_context
+from typing import Tuple
 import yaml
 import argparse
 import re
@@ -61,6 +62,40 @@ def create_event_frame(slice_events, frame_shape, downsample=False):
         
     return frame
 
+def conservative_bbox_filter(labels: np.ndarray) -> np.ndarray:
+    min_box_side = 5
+    w_lbl = labels['w']
+    h_lbl = labels['h']
+    side_ok = (w_lbl >= min_box_side) & (h_lbl >= min_box_side)
+    return labels[side_ok]
+
+def remove_faulty_huge_bbox_filter(labels: np.ndarray, dataset_type: str) -> np.ndarray:
+    assert dataset_type in {'gen1', 'gen4'}
+    max_width = (9 * (1280 if dataset_type == 'gen4' else 304)) // 10
+    side_ok = (labels['w'] <= max_width)
+    return labels[side_ok]
+
+def crop_to_fov_filter(labels: np.ndarray, frame_shape: Tuple[int, int]) -> np.ndarray:
+    frame_height, frame_width = frame_shape
+    x_left = labels['x']
+    y_top = labels['y']
+    x_right = x_left + labels['w']
+    y_bottom = y_top + labels['h']
+    
+    x_left_cropped = np.clip(x_left, 0, frame_width - 1)
+    y_top_cropped = np.clip(y_top, 0, frame_height - 1)
+    x_right_cropped = np.clip(x_right, 0, frame_width - 1)
+    y_bottom_cropped = np.clip(y_bottom, 0, frame_height - 1)
+    
+    labels['x'] = x_left_cropped
+    labels['y'] = y_top_cropped
+    labels['w'] = x_right_cropped - x_left_cropped
+    labels['h'] = y_bottom_cropped - y_top_cropped
+    
+    keep = (labels['w'] > 0) & (labels['h'] > 0)
+    return labels[keep]
+
+
 def prophesee_bbox_filter(labels: np.ndarray, dataset_type: str) -> np.ndarray:
     assert dataset_type in {'gen1', 'gen4'}
 
@@ -75,6 +110,13 @@ def prophesee_bbox_filter(labels: np.ndarray, dataset_type: str) -> np.ndarray:
     side_ok = (w_lbl >= min_box_side) & (h_lbl >= min_box_side)
     keep = diag_ok & side_ok
     labels = labels[keep]
+    return labels
+
+def apply_filters(labels: np.ndarray, dataset_type: str, frame_shape: Tuple[int, int]) -> np.ndarray:
+    labels = prophesee_bbox_filter(labels, dataset_type)
+    labels = conservative_bbox_filter(labels)
+    labels = remove_faulty_huge_bbox_filter(labels, dataset_type)
+    labels = crop_to_fov_filter(labels, frame_shape)
     return labels
 
 def process_sequence(args):
@@ -139,7 +181,6 @@ def process_sequence(args):
                 if track_id not in unique_detections or det['t'] > unique_detections[track_id]['t']:
                     unique_detections[track_id] = det
 
-            # フィルタリングの前に、labelsをBBOX_DTYPEのndarrayに変換
             labels_array = np.array([
                 (
                     label['t'],
@@ -153,7 +194,8 @@ def process_sequence(args):
                 ) for label in unique_detections.values()
             ], dtype=BBOX_DTYPE)
 
-            labels_filtered = prophesee_bbox_filter(labels_array, mode)
+            # ここで複数フィルタを適用
+            labels_filtered = apply_filters(labels_array, mode, frame_shape)
 
             labels = [
                 {
@@ -170,6 +212,7 @@ def process_sequence(args):
             ]
         else:
             labels = []
+
 
         # イベントフレームを作成
         event_frame = create_event_frame(slice_events, frame_shape, downsample=downsample)
