@@ -18,10 +18,6 @@ class SequenceDataset(Dataset):
         # インデックスファイルからデータを読み込む
         self.index_entries = self._load_index_files()
 
-        # ラベルが保証されている場合、ラベルが存在するエントリのみをフィルタリング
-        if self.guarantee_label:
-            self.index_entries = [entry for entry in self.index_entries if entry['label_file'] is not None]
-
         # タイムスタンプでソート
         self.index_entries.sort(key=lambda x: x['timestamp'][0])
 
@@ -41,14 +37,33 @@ class SequenceDataset(Dataset):
     def _get_start_indices(self) -> List[int]:
         indices = []
         total_entries = len(self.index_entries)
-        for idx in range(0, total_entries, self.sequence_length):
-            end_idx = idx + self.sequence_length
-            if end_idx > total_entries:
-                if self.padding == 'truncate':
-                    continue
-                elif self.padding == 'pad' or self.padding == 'ignore':
-                    end_idx = total_entries
-            indices.append(idx)
+        if self.guarantee_label:
+            # シーケンス内に少なくとも1つのラベルがある場合のみインデックスを追加
+            max_start_idx = total_entries - self.sequence_length
+            for idx in range(0, max_start_idx + 1):
+                end_idx = idx + self.sequence_length
+                if end_idx > total_entries:
+                    if self.padding == 'truncate':
+                        continue
+                    elif self.padding == 'pad' or self.padding == 'ignore':
+                        end_idx = total_entries
+                # シーケンス内に少なくとも1つのラベルがあるか確認
+                has_label = any(
+                    self.index_entries[i]['label_file'] is not None
+                    for i in range(idx, end_idx)
+                )
+                if has_label:
+                    indices.append(idx)
+        else:
+            # 全てのエントリを一定のシーケンス長で分割
+            for idx in range(0, total_entries, self.sequence_length):
+                end_idx = idx + self.sequence_length
+                if end_idx > total_entries:
+                    if self.padding == 'truncate':
+                        continue
+                    elif self.padding == 'pad' or self.padding == 'ignore':
+                        end_idx = total_entries
+                indices.append(idx)
         return indices
 
     def __len__(self):
