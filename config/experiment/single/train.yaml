@@ -15,10 +15,10 @@ experiment:
   dataset:
     train:
       num_workers: 12
-      batch_size: 32
+      batch_size: 128
     val:
       num_workers: 12
-      batch_size: 32
+      batch_size: 128
     test:
       num_workers: 12
-      batch_size: 32
+      batch_size: 128
