@@ -1,7 +1,6 @@
 dataset:
   name: dsec
   data_dir: './datasets/dsec-det'
-
   split_config: './data/dataset/dsec/detection/split.yaml'
   orig_size: [480, 640]
   target_size: ???
