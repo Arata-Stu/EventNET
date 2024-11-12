@@ -7,7 +7,7 @@ dataset:
 
   ev_representation: event_frame
   tau_ms: 100
-  delta_t_ms: 20
+  delta_t_ms: 10
 
   augmentation:
       prob_hflip: 0.5
@@ -29,16 +29,16 @@ dataset:
             max: 1.2
 
   train:
-    sequence_length: 1
+    sequence_length: 21
     guarantee_labels: true
     
     
   val:
-    sequence_length: 1
+    sequence_length: 21
     guarantee_labels: false
     
    
   test:
-    sequence_length: 1
+    sequence_length: 21
     guarantee_labels: false
     
