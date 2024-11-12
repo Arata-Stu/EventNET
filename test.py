@@ -1,4 +1,3 @@
-import yaml
 from omegaconf import OmegaConf
 from config.modifier import dynamically_modify_train_config
 from modules.fetch import fetch_data_module, fetch_model_module
