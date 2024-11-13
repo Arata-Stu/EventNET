@@ -77,8 +77,8 @@ def create_event_histogram(slice_events, frame_shape: Tuple[int, int], bins: int
     t_norm = (slice_events['t'] - t0) / max((t1 - t0), 1)
     t_idx = np.clip((t_norm * bins).astype(int), 0, bins - 1)
 
-    for p in [0, 1]:  # Polarityで分けて処理
-        mask = (slice_events['p'] == p)
+    for p, pol_value in enumerate([-1, 1]):  # Polarityが-1（オフ）と1（オン）で分けて処理
+        mask = (slice_events['p'] == pol_value)
         bin_indices = t_idx[mask]
         x_indices = slice_events['x'][mask]
         y_indices = slice_events['y'][mask]

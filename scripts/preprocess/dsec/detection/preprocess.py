@@ -1,6 +1,7 @@
 import os
 import h5py
 import hdf5plugin
+from typing import Tuple
 import numpy as np
 from tqdm import tqdm
 import yaml
@@ -24,9 +25,37 @@ def create_event_frame(slice_events, frame_shape):
 
     return frame
 
+def create_event_histogram(slice_events, frame_shape: Tuple[int, int], bins: int) -> np.ndarray:
+    """イベントデータ（辞書形式）からイベントヒストグラムを生成"""
+    height, width = frame_shape
+    representation = np.zeros((2, bins, height, width), dtype=np.uint8)  # 2はpolarityの数
+
+    # イベントが空の場合
+    if len(slice_events['x']) == 0:
+        return representation.reshape(-1, height, width)
+
+    # 正規化した時間インデックスの計算
+    t0 = slice_events['t'][0]
+    t1 = slice_events['t'][-1]
+    t_norm = (slice_events['t'] - t0) / max((t1 - t0), 1)
+    t_idx = np.clip((t_norm * bins).astype(int), 0, bins - 1)
+
+    for p in [0, 1]:  # Polarityで分けて処理
+        mask = (slice_events['p'] == p)
+        bin_indices = t_idx[mask]
+        x_indices = slice_events['x'][mask]
+        y_indices = slice_events['y'][mask]
+
+        for b, xi, yi in zip(bin_indices, x_indices, y_indices):
+            if 0 <= yi < height and 0 <= xi < width:
+                representation[p, b, yi, xi] += 1
+
+    return representation.reshape(-1, height, width)
+
+
 # 各シーケンスの処理
 def process_sequence(args):
-    data_dir, output_dir, seq, tau_ms, delta_t_ms, frame_shape = args
+    data_dir, output_dir, representation_type, bins,  seq, tau_ms, delta_t_ms, frame_shape = args
 
     # tau_ms と delta_t_ms をマイクロ秒に変換
     tau_us = tau_ms * 1000
@@ -92,8 +121,15 @@ def process_sequence(args):
             'p': events['p'][start_idx:end_idx],
         }
 
-        # イベントフレームを生成
-        event_frame = create_event_frame(slice_events, frame_shape)
+        # イベントフレームを作成
+        if representation_type == "frame":
+            event_frame = create_event_frame(slice_events, frame_shape)
+        elif representation_type == "histogram":
+            event_frame = create_event_histogram(slice_events, frame_shape, bins)
+        else:
+            raise ValueError(f"Unknown representation type: {representation_type}")
+
+
 
         # イベントフレームを保存
         np.savez_compressed(event_file_name, events=event_frame)
@@ -149,6 +185,9 @@ def process_sequence(args):
 def main(config):
     input_dir = config["input_dir"]
     output_dir = config["output_dir"]
+    representation_type = config.get("representation_type", "frame")
+    print('representation_type', representation_type)
+    bins = config.get("bins", 10)
     num_processors = config.get("num_processors", cpu_count())
     tau_ms = config["tau_ms"]
     delta_t_ms = config["delta_t_ms"]
@@ -159,7 +198,7 @@ def main(config):
 
     with tqdm(total=len(sequences), desc="Processing sequences") as pbar:
         with get_context('spawn').Pool(processes=num_processors) as pool:
-            args_list = [(input_dir, output_dir, seq, tau_ms, delta_t_ms, frame_shape) for seq in sequences]
+            args_list = [(input_dir, output_dir, representation_type, bins, seq, tau_ms, delta_t_ms, frame_shape) for seq in sequences]
             for _ in pool.imap_unordered(process_sequence, args_list):
                 pbar.update()
 
