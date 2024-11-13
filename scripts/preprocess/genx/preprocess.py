@@ -273,21 +273,9 @@ def process_sequence(args):
 
         # ラベルが存在する場合のみラベルファイルを保存
         if labels:
-            labels_array = np.array([
-                (
-                    label['t'],
-                    label['x'],
-                    label['y'],
-                    label['w'],
-                    label['h'],
-                    label['class_id'],
-                    label['track_id'],
-                    label['class_confidence']
-                ) for label in labels
-            ], dtype=BBOX_DTYPE)  # BBOX_DTYPEを使用して適切なdtypeを指定
-
+            
             if not os.path.exists(label_save_path):
-                np.savez_compressed(label_save_path, labels=labels_array)
+                np.savez_compressed(label_save_path, labels=labels)
 
 
         # ファイル名のみをindex.jsonに保存
