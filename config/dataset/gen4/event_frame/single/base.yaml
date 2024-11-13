@@ -1,13 +1,13 @@
 dataset:
-  name: gen1
-  data_dir: './datasets/pre_gen1_frame'
-  orig_size: [240, 304]
+  name: gen4
+  data_dir: ${PROJECT_ROOT}/datasets/pre_gen4_frame
+  orig_size: [360, 640]
   target_size: ???
-  downsample_by_factor_2: false
+  downsample_by_factor_2: true
 
   ev_representation: event_frame
-  tau_ms: 50
-  delta_t_ms: 33
+  tau_ms: 100
+  delta_t_ms: 50
 
   augmentation:
       prob_hflip: 0.5

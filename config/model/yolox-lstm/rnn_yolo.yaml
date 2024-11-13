@@ -1,21 +1,21 @@
 model:
-  name: 'yolox-lstm'
-  type: 'rnn'
+  name: yolox-lstm
+  type: rnn
   partition_split_32: 1
   
   backbone:
-    name: 'darknet_lstm'
+    name: darknet_lstm
     darknet:
-      name: 'darknet'
+      name: darknet
       depth: 0.33
       width: 0.5
       input_dim: ???
-      out_features: ["dark3", "dark4", "dark5"] #choose darknet outputs 'stem', 'dark 2 ~ 5'
+      out_features: [dark3, dark4, dark5] #choose darknet outputs 'stem', 'dark 2 ~ 5'
       depthwise: false
-      act: "silu"
+      act: silu
     
     lstm:
-      name: 'LSTM'
+      name: LSTM
       dim: ???
       dws_conv: false
       dws_conv_only_hidden: true
@@ -23,20 +23,20 @@ model:
       drop_cell_update: 0
   
   neck:
-    name: 'pafpn'
+    name: pafpn
     depth: 0.33
-    in_stages: ["dark3", "dark4", "dark5"]
+    in_stages: [dark3, dark4, dark5]
     in_channels: ???
     depthwise: false
-    act: "silu"
+    act: silu
 
 
   head:
-    name: 'yolox'
+    name: yolox
     num_classes: ???
     strides: ???
     in_channels: ???
-    act: "silu"
+    act: silu
     depthwise: false
 
   postprocess:

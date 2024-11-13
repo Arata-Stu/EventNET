@@ -1,13 +1,12 @@
 dataset:
-  name: dsec
-  data_dir: './datasets/dsec-det'
-  split_config: './data/dataset/dsec/detection/split.yaml'
-  orig_size: [480, 640]
+  name: gen1
+  data_dir: ${PROJECT_ROOT}/datasets/pre_gen1_frame
+  orig_size: [240, 304]
   target_size: ???
   downsample_by_factor_2: false
 
   ev_representation: event_frame
-  tau_ms: 50
+  tau_ms: 100
   delta_t_ms: 50
 
   augmentation:
@@ -30,16 +29,16 @@ dataset:
             max: 1.2
 
   train:
-    sequence_length: 21
+    sequence_length: 1
     guarantee_labels: true
     
     
   val:
-    sequence_length: 21
+    sequence_length: 1
     guarantee_labels: false
     
    
   test:
-    sequence_length: 21
+    sequence_length: 1
     guarantee_labels: false
     
