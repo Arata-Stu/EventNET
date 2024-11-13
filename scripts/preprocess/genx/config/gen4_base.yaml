@@ -1,0 +1,14 @@
+mode: gen4 
+
+input_dir: ${oc.env:DATA_DIR, /default/path}
+output_dir: ${oc.env:DEST_DIR, /default/path}
+num_processors: ${oc.env:NUM_PROCESS, 1}
+
+representation_type: frame # histogram or frame
+bins: 10 # for histogram
+
+tau_ms: 100       # イベントを取得する間隔（ミリ秒）
+delta_t_ms: 50   # 各取得におけるイベントの長さ（ミリ秒）
+
+frame_shape: [720, 1280] # 画像のサイズ gen1: [240, 304], gen4: [720, 1280]
+downsample: true # gen1: false, gen4: true
