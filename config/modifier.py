@@ -12,7 +12,7 @@ def dynamically_modify_train_config(config: DictConfig):
         dataset_name = dataset_cfg.name
         assert dataset_name in {'gen1', 'gen4', 'dsec'}
 
-        dataset_cfg.data_dir = os.path.join('../../', dataset_cfg.data_dir)
+        # dataset_cfg.data_dir = os.path.join('../../', dataset_cfg.data_dir)
         dataset_hw = dataset_cfg.orig_size
 
         mdl_cfg = config.model

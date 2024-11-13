@@ -1,6 +1,6 @@
 dataset:
   name: gen4
-  data_dir: ${PROJECT_ROOT}/datasets/pre_gen4_frame
+  data_dir: ${oc.env:PROJECT_ROOT, ..}/datasets/pre_gen4_frame
   orig_size: [360, 640]
   target_size: ???
   downsample_by_factor_2: true

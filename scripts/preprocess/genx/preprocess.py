@@ -5,7 +5,8 @@ import numpy as np
 from tqdm import tqdm
 from multiprocessing import Pool, cpu_count, get_context
 from typing import Tuple
-import yaml
+
+from omegaconf import OmegaConf
 import argparse
 import re
 import cv2  # OpenCVを使用して解像度変更
@@ -272,21 +273,9 @@ def process_sequence(args):
 
         # ラベルが存在する場合のみラベルファイルを保存
         if labels:
-            labels_array = np.array([
-                (
-                    label['t'],
-                    label['x'],
-                    label['y'],
-                    label['w'],
-                    label['h'],
-                    label['class_id'],
-                    label['track_id'],
-                    label['class_confidence']
-                ) for label in labels
-            ], dtype=BBOX_DTYPE)  # BBOX_DTYPEを使用して適切なdtypeを指定
-
+            
             if not os.path.exists(label_save_path):
-                np.savez_compressed(label_save_path, labels=labels_array)
+                np.savez_compressed(label_save_path, labels=labels)
 
 
         # ファイル名のみをindex.jsonに保存
@@ -305,14 +294,14 @@ def process_sequence(args):
     print(f"Completed processing sequence: {seq} in split: {split}")
 
 def main(config):
-    input_dir = config["input_dir"]
-    output_dir = config["output_dir"]
-    num_processors = config.get("num_processors", cpu_count())
+    input_dir = config.input_dir
+    output_dir = config.output_dir
+    num_processors = int(config.get("num_processors", cpu_count()))
     representation_type = config.get("representation_type", "frame")
     bins = config.get("bins", 10)
-    tau_ms = config["tau_ms"]
-    delta_t_ms = config["delta_t_ms"]
-    frame_shape = tuple(config["frame_shape"])
+    tau_ms = config.tau_ms
+    delta_t_ms = config.delta_t_ms
+    frame_shape = tuple(config.frame_shape)
     mode = config.get("mode", "gen1")
     downsample = config.get("downsample", False)
 
@@ -330,8 +319,8 @@ if __name__ == '__main__':
     parser.add_argument('--config', type=str, required=True, help="Path to the configuration YAML file")
     args = parser.parse_args()
 
-    with open(args.config, 'r') as f:
-        config = yaml.safe_load(f)
+    # omegaconfを使用して設定ファイルを読み込む
+    config = OmegaConf.load(args.config)
 
     start_time = time.time()
 
