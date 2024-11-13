@@ -20,6 +20,9 @@ BBOX_DTYPE = np.dtype({
     'itemsize': 40
 })
 
+def get_last_dir_name(path):
+    return os.path.basename(os.path.normpath(path))
+
 def find_event_and_bbox_files(sequence_dir, mode):
     """指定されたディレクトリ内でイベントデータとBBOXファイルを検索し、`gen1`と`gen4`で処理を分ける"""
     files = os.listdir(sequence_dir)
@@ -155,12 +158,15 @@ def process_sequence(args):
     data_dir, output_dir, representation_type, bins, split, seq, tau_ms, delta_t_ms, frame_shape, mode, downsample = args
     print(f"Processing : {seq} in split: {split}")
 
-
     tau_us = tau_ms * 1000
     delta_t_us = delta_t_ms * 1000
 
-    seq_output_dir = os.path.join(output_dir, split, seq, f"tau={tau_ms}_dt={delta_t_ms}")
-    os.makedirs(seq_output_dir, exist_ok=True)
+    # output_dirの最後のディレクトリ名を取得
+    output_dir_last = get_last_dir_name(output_dir)
+
+    # 完全な出力ディレクトリを組み立て
+    full_output_dir = os.path.join(output_dir, split, seq, f"tau={tau_ms}_dt={delta_t_ms}")
+    os.makedirs(full_output_dir, exist_ok=True)
 
     sequence_dir = os.path.join(data_dir, split, seq)
     event_file, bbox_file = find_event_and_bbox_files(sequence_dir, mode)
@@ -227,7 +233,6 @@ def process_sequence(args):
                 ) for label in unique_detections.values()
             ], dtype=BBOX_DTYPE)
 
-            # ここで複数フィルタを適用
             labels_filtered = apply_filters(labels_array, mode, frame_shape)
 
             labels = [
@@ -246,7 +251,6 @@ def process_sequence(args):
         else:
             labels = []
 
-
         # イベントフレームを作成
         if representation_type == "frame":
             event_frame = create_event_frame(slice_events, frame_shape, downsample=downsample)
@@ -255,36 +259,46 @@ def process_sequence(args):
         else:
             raise ValueError(f"Unknown representation type: {representation_type}")
 
-
         # ファイル名の定義
         timestamp_str = f"{int(data_start)}_to_{int(data_end)}"
-        event_file_name = os.path.join(seq_output_dir, f"{timestamp_str}_event.npz")
-        label_file_name = os.path.join(seq_output_dir, f"{timestamp_str}_label.npz")
+        event_file_name = f"{timestamp_str}_event.npz"
+        event_save_path = os.path.join(full_output_dir, event_file_name)
+        label_file_name = f"{timestamp_str}_label.npz"
+        label_save_path = os.path.join(full_output_dir, label_file_name)
 
-        # イベントフレームを圧縮形式で保存
-        if not os.path.exists(event_file_name):
-            np.savez_compressed(event_file_name, events=event_frame)
+        # イベントファイルを保存
+        if not os.path.exists(event_save_path):
+            np.savez_compressed(event_save_path, events=event_frame)
 
-        # ラベルが存在する場合のみ圧縮形式で保存
+        # ラベルが存在する場合のみラベルファイルを保存
         if labels:
-            if not os.path.exists(label_file_name):
-                np.savez_compressed(label_file_name, labels=labels)
-            has_label = True
-        else:
-            has_label = False
-            label_file_name = None  # ラベルファイルがない場合はNoneに設定
+            labels_array = np.array([
+                (
+                    label['t'],
+                    label['x'],
+                    label['y'],
+                    label['w'],
+                    label['h'],
+                    label['class_id'],
+                    label['track_id'],
+                    label['class_confidence']
+                ) for label in labels
+            ], dtype=BBOX_DTYPE)  # BBOX_DTYPEを使用して適切なdtypeを指定
+
+            if not os.path.exists(label_save_path):
+                np.savez_compressed(label_save_path, labels=labels_array)
 
 
-        # インデックスリストに追加
+        # ファイル名のみをindex.jsonに保存
         index_entry = {
             'event_file': event_file_name,
-            'label_file': label_file_name,
+            'label_file': label_file_name if labels else None,
             'timestamp': (int(data_start), int(data_end))
         }
         index_list.append(index_entry)
 
     # インデックスファイルをJSON形式で保存
-    index_file_path = os.path.join(seq_output_dir, 'index.json')
+    index_file_path = os.path.join(full_output_dir, 'index.json')
     with open(index_file_path, 'w') as index_file:
         json.dump(index_list, index_file)
 
@@ -295,7 +309,6 @@ def main(config):
     output_dir = config["output_dir"]
     num_processors = config.get("num_processors", cpu_count())
     representation_type = config.get("representation_type", "frame")
-    print('representation_type', representation_type)
     bins = config.get("bins", 10)
     tau_ms = config["tau_ms"]
     delta_t_ms = config["delta_t_ms"]

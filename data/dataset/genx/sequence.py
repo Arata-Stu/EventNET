@@ -2,13 +2,13 @@ import os
 import numpy as np
 import torch
 from torch.utils.data import Dataset
-from typing import List, Optional, Dict
+from typing import List, Dict
 import json
 
 class SequenceDataset(Dataset):
     def __init__(self, data_dir: str, mode: str = 'train', sequence_length: int = 1,
                  guarantee_label: bool = False, padding: str = 'pad', transform=None):
-        self.data_dir = data_dir
+        self.data_dir = os.path.abspath(data_dir)  # 絶対パスに変換して一貫性を保つ
         self.mode = mode
         self.sequence_length = sequence_length
         self.guarantee_label = guarantee_label
@@ -31,6 +31,10 @@ class SequenceDataset(Dataset):
                 index_path = os.path.join(root, 'index.json')
                 with open(index_path, 'r') as f:
                     entries = json.load(f)
+                    # パスは結合のみで絶対パス化
+                    for entry in entries:
+                        entry['event_file'] = os.path.join(self.data_dir, entry['event_file'])
+                        entry['label_file'] = os.path.join(self.data_dir, entry['label_file']) if entry['label_file'] else None
                     index_entries.extend(entries)
         return index_entries
 
@@ -45,7 +49,7 @@ class SequenceDataset(Dataset):
                 if end_idx > total_entries:
                     if self.padding == 'truncate':
                         break
-                    elif self.padding == 'pad' or self.padding == 'ignore':
+                    elif self.padding in ['pad', 'ignore']:
                         end_idx = total_entries
 
                 # シーケンス内に少なくとも1つのラベルがあるか確認
@@ -55,7 +59,6 @@ class SequenceDataset(Dataset):
                 )
                 if has_label:
                     indices.append(idx)
-                # シーケンスがラベルを含んでいるかにかかわらず、インデックスをシーケンス長分だけ進める
                 idx += self.sequence_length
 
         else:
@@ -65,12 +68,11 @@ class SequenceDataset(Dataset):
                 if end_idx > total_entries:
                     if self.padding == 'truncate':
                         continue
-                    elif self.padding == 'pad' or self.padding == 'ignore':
+                    elif self.padding in ['pad', 'ignore']:
                         end_idx = total_entries
                 indices.append(idx)
 
         return indices
-
 
     def __len__(self):
         return len(self.start_indices)
@@ -88,11 +90,14 @@ class SequenceDataset(Dataset):
             entry = self.index_entries[i]
 
             # 圧縮されたイベントフレームを読み込む
-            with np.load(entry['event_file'], allow_pickle=True) as data:
-                event_frame = data['events']
-            frames.append(torch.from_numpy(event_frame).permute(2, 0, 1))
+            if os.path.exists(entry['event_file']):
+                with np.load(entry['event_file'], allow_pickle=True) as data:
+                    event_frame = data['events']
+                frames.append(torch.from_numpy(event_frame).permute(2, 0, 1))
+            else:
+                raise FileNotFoundError(f"Event file not found: {entry['event_file']}")
 
-            # ラベルを読み込む（存在しない場合は空のリスト）
+            # ラベルを読み込む（存在しない場合は空のテンソル）
             if entry['label_file'] and os.path.exists(entry['label_file']):
                 with np.load(entry['label_file'], allow_pickle=True) as data:
                     labels = data['labels']
