@@ -112,10 +112,12 @@ def process_sequence(args):
         end_idx = np.searchsorted(events['t'], end)
 
         timestamp_str = f"{int(start)}_to_{int(end)}"
-        event_file_name = os.path.join(seq_output_dir, f"{timestamp_str}_event.npz")
-        label_file_name = os.path.join(seq_output_dir, f"{timestamp_str}_label.npz")
+        event_file_name = f"{timestamp_str}_event.npz"
+        event_save_name = os.path.join(seq_output_dir, f"{timestamp_str}_event.npz")
+        label_file_name = f"{timestamp_str}_label.npz"
+        label_save_name = os.path.join(seq_output_dir, f"{timestamp_str}_label.npz")
 
-        if os.path.exists(event_file_name) and os.path.exists(label_file_name):
+        if os.path.exists(event_save_name) and os.path.exists(label_save_name):
             continue
 
         # イベントスライスを生成
@@ -137,7 +139,7 @@ def process_sequence(args):
 
 
         # イベントフレームを保存
-        np.savez_compressed(event_file_name, events=event_frame)
+        np.savez_compressed(event_save_name, events=event_frame)
 
         if detections.size > 0:
             # タイムウィンドウ内の検出データを取得
@@ -164,7 +166,7 @@ def process_sequence(args):
                 })
 
             # ラベルを圧縮保存
-            np.savez_compressed(label_file_name, labels=labels)
+            np.savez_compressed(label_save_name, labels=labels)
             has_label = True
         else:
             labels = []

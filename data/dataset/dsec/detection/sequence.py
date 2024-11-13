@@ -35,13 +35,14 @@ class SequenceDataset(Dataset):
                 index_path = os.path.join(root, 'index.json')
                 with open(index_path, 'r') as f:
                     entries = json.load(f)
-                    # ディレクトリ構成に合わせてパスを補完する場合、以下のように設定
+                    # ディレクトリ構成に合わせて絶対パスに変換
                     for entry in entries:
-                        entry['event_file'] = os.path.join(root, entry['event_file'])
+                        entry['event_file'] = os.path.abspath(os.path.join(root, entry['event_file']))
                         if entry.get('label_file'):
-                            entry['label_file'] = os.path.join(root, entry['label_file'])
+                            entry['label_file'] = os.path.abspath(os.path.join(root, entry['label_file']))
                     index_entries.extend(entries)
         return index_entries
+
 
     def _has_label(self, idx: int) -> bool:
         return self.index_entries[idx].get('label_file') is not None
