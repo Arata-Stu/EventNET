@@ -1,12 +1,21 @@
 # config_list.yaml
 model_configs:
-  - ./config/model/yolox/yolox-s.yaml
+  - .${oc.env:PROJECT_ROOT}/config/model/rvt_detector/rvt_frame.yaml
 
 exp_configs:
-  - ./config/experiment/single/train.yaml
+  - ${oc.env:PROJECT_ROOT}/config/experiment/sequence/train.yaml
 
 dataset_configs:
-  - ./config/dataset/gen1/event_frame/single/tau=100_dt=10.yaml
-  - ./config/dataset/gen1/event_frame/single/tau=100_dt=20.yaml
-  - ./config/dataset/gen1/event_frame/single/tau=100_dt=33.yaml
-  - ./config/dataset/gen1/event_frame/single/tau=100_dt=50.yaml
+  - ${oc.env:PROJECT_ROOT}/config/dataset/gen1/event_frame/sequence/base.yaml
+  
+  parameters:
+    - delta_t_ms: 10
+      tau_ms: 100
+    - delta_t_ms: 20
+      tau_ms: 100
+    - delta_t_ms: 33
+      tau_ms: 100
+    - delta_t_ms: 50
+      tau_ms: 100
+    - delta_t_ms: 100
+      tau_ms: 100
