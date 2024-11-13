@@ -1,6 +1,6 @@
 dataset:
   name: gen1
-  data_dir: './datasets/pre_gen1_frame'
+  data_dir: '${PROJECT_ROOT}/datasets/pre_gen1_frame'
   orig_size: [240, 304]
   target_size: ???
   downsample_by_factor_2: false
