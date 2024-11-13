@@ -1,6 +1,6 @@
 mode: gen1
 
-input_dir: "/path/to/dataset/gen1/"
+input_dir: ${oc.env:PROJECT_ROOT, /default/path}
 output_dir: "/path/to/dataset/pre_gen1_frame/"
 num_processors: 2
 

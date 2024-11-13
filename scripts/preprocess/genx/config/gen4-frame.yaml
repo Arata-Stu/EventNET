@@ -1,7 +1,7 @@
 mode: gen4
 
-input_dir: "/path/to/dataset/gen4/"
-output_dir: "/path/to/dataset/pre_gen4_frame/"
+input_dir: /path/to/dataset/gen4/
+output_dir: /path/to/dataset/pre_gen4_frame/"
 num_processors: 2
 
 representation_type: frame # histogram or frame

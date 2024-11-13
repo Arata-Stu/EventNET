@@ -1,6 +1,6 @@
 experiment:
   training:
-    precision: '16-mixed'
+    precision: 16-mixed
     max_epochs: 50
     max_steps: 400000
     learning_rate: 0.0002

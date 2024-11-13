@@ -1,7 +1,7 @@
 mode: gen1
 
-input_dir: "/path/to/dataset/gen1/"
-output_dir: "/path/to/dataset/pre_gen1_histogram/"
+input_dir: /path/to/dataset/gen1/
+output_dir: /path/to/dataset/pre_gen1_histogram/
 num_processors: 2
 
 representation_type: histogram # histogram or frame

@@ -1,6 +1,6 @@
 model:
-  name: 'rvt-t'
-  type: 'rnn'
+  name: rvt-t
+  type: rnn
   
   backbone:
     name: RVT
@@ -44,20 +44,20 @@ model:
       - ???
   
   neck:
-    name: 'pafpn'
+    name: pafpn
     depth: 0.33
     in_stages: [2, 3, 4]
     in_channels: ???
     depthwise: false
-    act: "silu"
+    act: silu
 
 
   head:
-    name: 'yolox'
+    name: yolox
     num_classes: ???
     strides: ???
     in_channels: ???
-    act: "silu"
+    act: silu
     depthwise: false
 
   postprocess:

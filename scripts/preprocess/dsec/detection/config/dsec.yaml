@@ -1,5 +1,5 @@
-input_dir: "/path/to/dataset/DSEC/"
-output_dir: "/path/to/dataset/dsec-det/"
+input_dir: /path/to/dataset/DSEC/
+output_dir: /path/to/dataset/dsec-det/
 num_processors: 2
 
 representation_type: frame # histogram or frame
