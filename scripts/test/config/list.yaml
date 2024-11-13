@@ -1,5 +1,4 @@
 # config_list.yaml
 ckpt_paths:
-  - path/to/checkpoint1.ckpt
-  - path/to/checkpoint2.ckpt
-  - path/to/checkpoint3.ckpt
+  - ${oc.env:PROJECT_ROOT}/scripts/result/path/to/ckpt1.ckpt
+  - ${oc.env:PROJECT_ROOT}/scripts/result/path/to/ckpt2.ckpt

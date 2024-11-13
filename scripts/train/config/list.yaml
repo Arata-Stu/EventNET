@@ -1,6 +1,6 @@
 # config_list.yaml
 model_configs:
-  - .${oc.env:PROJECT_ROOT}/config/model/rvt_detector/rvt_frame.yaml
+  - ${oc.env:PROJECT_ROOT}/config/model/rvt_detector/rvt_frame.yaml
 
 exp_configs:
   - ${oc.env:PROJECT_ROOT}/config/experiment/sequence/train.yaml

@@ -11,8 +11,7 @@ args = parser.parse_args()
 
 # 引数で指定されたconfig_list.yamlのパスを読み込み
 config_list_path = args.config
-with open(config_list_path, 'r') as file:
-    config_list = yaml.safe_load(file)
+config_list = OmegaConf.load(config_list_path)
 
 # 各設定ファイルのパスを取得
 model_config_path = config_list['model_configs'][0]

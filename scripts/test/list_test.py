@@ -1,6 +1,7 @@
 import argparse
 import yaml
 import os
+from omegaconf import OmegaConf
 from test import main as test
 
 
@@ -10,14 +11,12 @@ parser.add_argument("--config", type=str, required=True, help="Path to the ckpt_
 args = parser.parse_args()
 
 # 指定された YAML ファイルを読み込む
-with open(args.config, 'r') as file:
-    config_list = yaml.safe_load(file)
+config_list_path = args.config
+config_list = OmegaConf.load(config_list_path)
 
 # ckpt_paths のリストを取得
 ckpt_paths = config_list['ckpt_paths']
 
 # 各 ckpt_path をループしてテスト実行
 for ckpt_path in ckpt_paths:
-    model_config_path = os.path.join('../', ckpt_path)
-    print(f"Testing with checkpoint: {model_config_path}")
-    test(model_config_path)
+    test(ckpt_path)
