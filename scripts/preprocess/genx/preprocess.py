@@ -52,9 +52,13 @@ def create_event_frame(slice_events, frame_shape, downsample=False):
     off_events = (slice_events['p'] == -1)
     on_events = (slice_events['p'] == 1)
 
+    # クリップ処理を追加
+    x_clipped = np.clip(slice_events['x'], 0, width - 1)
+    y_clipped = np.clip(slice_events['y'], 0, height - 1)
+
     # オンイベントを赤、オフイベントを青に割り当て
-    frame[slice_events['y'][off_events], slice_events['x'][off_events]] = np.array([0, 0, 255], dtype=np.uint8)
-    frame[slice_events['y'][on_events], slice_events['x'][on_events]] = np.array([255, 0, 0], dtype=np.uint8)
+    frame[y_clipped[off_events], x_clipped[off_events]] = np.array([0, 0, 255], dtype=np.uint8)
+    frame[y_clipped[on_events], x_clipped[on_events]] = np.array([255, 0, 0], dtype=np.uint8)
 
     # downsampleがTrueの場合、解像度を半分にする
     if downsample:
@@ -63,7 +67,6 @@ def create_event_frame(slice_events, frame_shape, downsample=False):
     return frame
 
 def create_event_histogram(slice_events, frame_shape: Tuple[int, int], bins: int) -> np.ndarray:
-    """イベントデータ（辞書形式）からイベントヒストグラムを生成"""
     height, width = frame_shape
     representation = np.zeros((2, bins, height, width), dtype=np.uint8)  # 2はpolarityの数
 
@@ -80,12 +83,13 @@ def create_event_histogram(slice_events, frame_shape: Tuple[int, int], bins: int
     for p, pol_value in enumerate([-1, 1]):  # Polarityが-1（オフ）と1（オン）で分けて処理
         mask = (slice_events['p'] == pol_value)
         bin_indices = t_idx[mask]
-        x_indices = slice_events['x'][mask]
-        y_indices = slice_events['y'][mask]
+        
+        # クリップ処理を追加
+        x_clipped = np.clip(slice_events['x'][mask], 0, width - 1)
+        y_clipped = np.clip(slice_events['y'][mask], 0, height - 1)
 
-        for b, xi, yi in zip(bin_indices, x_indices, y_indices):
-            if 0 <= yi < height and 0 <= xi < width:
-                representation[p, b, yi, xi] += 1
+        for b, xi, yi in zip(bin_indices, x_clipped, y_clipped):
+            representation[p, b, yi, xi] += 1
 
     return representation.reshape(-1, height, width)
 
