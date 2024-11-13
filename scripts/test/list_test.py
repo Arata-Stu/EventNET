@@ -19,5 +19,5 @@ ckpt_paths = config_list['ckpt_paths']
 # 各 ckpt_path をループしてテスト実行
 for ckpt_path in ckpt_paths:
     model_config_path = os.path.join('../', ckpt_path)
-    print(f"Testing with checkpoint: {ckpt_path}")
-    test(ckpt_path)
+    print(f"Testing with checkpoint: {model_config_path}")
+    test(model_config_path)

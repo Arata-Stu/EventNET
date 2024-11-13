@@ -25,4 +25,4 @@ for model_config, exp_config, dataset_config in product(model_configs, exp_confi
     model_config_path = os.path.join('../../', model_config)
     exp_config_path = os.path.join('../../', exp_config)
     dataset_config_path = os.path.join('../../', dataset_config)
-    train(model_config, exp_config, dataset_config)
+    train(model_config_path, exp_config_path, dataset_config_path)
