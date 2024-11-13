@@ -4,7 +4,7 @@ import hdf5plugin
 from typing import Tuple
 import numpy as np
 from tqdm import tqdm
-import yaml
+from omegaconf import OmegaConf  # omegaconfをインポート
 from multiprocessing import Pool, cpu_count, get_context
 import argparse
 import json
@@ -188,17 +188,17 @@ def process_sequence(args):
 
     print(f"Completed processing sequence: {seq}")
 
-# メイン処理
+
 def main(config):
-    input_dir = config["input_dir"]
-    output_dir = config["output_dir"]
+    input_dir = config.input_dir
+    output_dir = config.output_dir
     representation_type = config.get("representation_type", "frame")
     print('representation_type', representation_type)
     bins = config.get("bins", 10)
-    num_processors = config.get("num_processors", cpu_count())
-    tau_ms = config["tau_ms"]
-    delta_t_ms = config["delta_t_ms"]
-    frame_shape = tuple(config["frame_shape"])
+    num_processors = int(config.get("num_processors", cpu_count()))
+    tau_ms = config.tau_ms
+    delta_t_ms = config.delta_t_ms
+    frame_shape = tuple(config.frame_shape)
 
     sequences = [seq for seq in os.listdir(input_dir) if os.path.isdir(os.path.join(input_dir, seq))]
     os.makedirs(output_dir, exist_ok=True)
@@ -214,8 +214,8 @@ if __name__ == '__main__':
     parser.add_argument('--config', type=str, required=True, help="Path to the configuration YAML file")
     args = parser.parse_args()
 
-    with open(args.config, 'r') as f:
-        config = yaml.safe_load(f)
+    # omegaconfを使用して設定ファイルを読み込む
+    config = OmegaConf.load(args.config)
 
     start_time = time.time()
 
