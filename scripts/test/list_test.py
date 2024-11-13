@@ -1,7 +1,7 @@
 import argparse
 import yaml
 import os
-from .test import main as test
+from test import main as test
 
 
 # 引数を解析

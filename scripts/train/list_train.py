@@ -2,7 +2,7 @@ from itertools import product
 import argparse
 import yaml
 import os
-from .train import main as train
+from train import main as train
 
 # 引数を解析
 parser = argparse.ArgumentParser(description="Training loop with multiple configuration combinations")
