@@ -23,11 +23,11 @@ def process_with_parameters(base_config, parameters):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Process with multiple delta and tau values from list.yaml")
-    parser.add_argument('--list', type=str, required=True, help="Path to the list.yaml file containing base config file and parameters")
+    parser.add_argument('--config', type=str, required=True, help="Path to the list.yaml file containing base config file and parameters")
     args = parser.parse_args()
 
     # list.yamlファイルを読み込み、base_configとparametersリストを取得
-    config_data = OmegaConf.load(args.list)
+    config_data = OmegaConf.load(args.config)
     base_config_path = config_data.base_config
     parameters = config_data.parameters
 
