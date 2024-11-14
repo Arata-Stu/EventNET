@@ -1,0 +1,54 @@
+# config_list.yaml
+model_configs:
+  - ${oc.env:PROJECT_ROOT}/config/model/rvt_detector/rvt_frame.yaml
+
+exp_configs:
+  - ${oc.env:PROJECT_ROOT}/config/experiment/sequence/train.yaml
+
+dataset_configs:
+  - ${oc.env:PROJECT_ROOT}/config/dataset/gen1/event_frame/sequence/base.yaml
+
+parameters:
+  param1:
+    delta_t_ms: 50
+    tau_ms: 100
+    augmentation:
+      prob_hflip: 0.5
+      rotate:
+        prob: 0.8
+        min_angle_deg: -6
+        max_angle_deg: 6
+      zoom:
+        prob: 0.8
+        zoom_in:
+          weight: 8
+          factor:
+            min: 1.0
+            max: 1.5
+        zoom_out:
+          weight: 2
+          factor:
+            min: 1.0
+            max: 1.2
+
+  param2:
+    delta_t_ms: 50
+    tau_ms: 100
+    augmentation:
+      prob_hflip: 0.5
+      rotate:
+        prob: 0.8
+        min_angle_deg: -6
+        max_angle_deg: 6
+      zoom:
+        prob: 0.8
+        zoom_in:
+          weight: 8
+          factor:
+            min: 1.0
+            max: 1.5
+        zoom_out:
+          weight: 2
+          factor:
+            min: 1.0
+            max: 1.2
