@@ -11,17 +11,14 @@ from pytorch_lightning.callbacks import ModelCheckpoint, LearningRateMonitor
 from pytorch_lightning import loggers as pl_loggers
 import os
 import datetime
-import argparse
 
-def main(model_config, exp_config, dataset_config):
+def main(merged_conf):
     base_save_dir = './../result'
     
     # 実行時のタイムスタンプを付与して、一意のディレクトリ名を生成
     timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
     
-    # 各 YAML ファイルを読み込んで OmegaConf にマージ
-    configs = [OmegaConf.load(path) for path in [model_config, exp_config, dataset_config]]
-    merged_conf = OmegaConf.merge(*configs)
+    # 必要に応じて `dynamically_modify_train_config` で `merged_conf` をさらに修正
     dynamically_modify_train_config(merged_conf)
     
     # dataset.name, model.name, ev_representation, ev_delta_t を取得
@@ -51,48 +48,56 @@ def main(model_config, exp_config, dataset_config):
     # コールバックの設定
     callbacks = [
         ModelCheckpoint(
-            dirpath=save_dir,  # save_dirにチェックポイントを保存
+            dirpath=save_dir,
             filename='{epoch:02d}-{val_AP:.2f}',
-            monitor='val_AP',  # 基準とする量
-            mode="max", 
-            save_top_k=3,  # 保存するトップkのチェックポイント
-            save_last=True, 
+            monitor='val_AP',
+            mode="max",
+            save_top_k=3,
+            save_last=True,
         ),
-        # 学習率のモニターを追加
         LearningRateMonitor(logging_interval='step')
     ]
 
     # TensorBoard Loggerもsave_dirに対応させる
     logger = pl_loggers.TensorBoardLogger(
-        save_dir=save_dir,  # ckptの保存ディレクトリに合わせる
-        name='',  # nameを空にすることで、サブディレクトリを作成しない
+        save_dir=save_dir,
+        name='',
         version='',
     )
 
-    
-
-    train_cfg = merged_conf.experiment.training
     # トレーナーを設定
+    train_cfg = merged_conf.experiment.training
     trainer = pl.Trainer(
         max_epochs=train_cfg.max_epochs,
         max_steps=train_cfg.max_steps,
-        logger=logger,  # Loggerに対応させる
+        logger=logger,
         callbacks=callbacks,
         accelerator='gpu',
-        precision=train_cfg.precision, 
-        devices=[0],  # 使用するGPUのIDのリスト
-        benchmark=True,  # cudnn.benchmarkを使用して高速化
-        profiler= 'simple',
+        precision=train_cfg.precision,
+        devices=[0],
+        benchmark=True,
+        profiler='simple',
     )
 
     # モデルの学習を実行
     trainer.fit(model, datamodule=data)
 
 if __name__ == '__main__':
+    import argparse
+
+    # コマンドライン引数から設定ファイルのパスを取得し、事前にマージして `merged_conf` を作成
     parser = argparse.ArgumentParser(description='Train a model with specified YAML config files')
     parser.add_argument('--model', type=str, required=True, help='Path to model configuration file')
     parser.add_argument('--exp', type=str, required=True, help='Path to experiment configuration file')
     parser.add_argument('--dataset', type=str, required=True, help='Path to dataset configuration file')
 
     args = parser.parse_args()
-    main(args.model, args.exp, args.dataset)
+
+    # 個別のconfigファイルをロードしてマージ
+    model_config = OmegaConf.load(args.model)
+    exp_config = OmegaConf.load(args.exp)
+    dataset_config = OmegaConf.load(args.dataset)
+    merged_conf = OmegaConf.merge(model_config, exp_config, dataset_config)
+
+    # 統合された `merged_conf` を `main` に渡す
+    main(merged_conf)

@@ -67,3 +67,29 @@ def _get_modified_hw_multiple_of(hw: Tuple[int, int], multiple_of: int) -> Tuple
         return hw
     new_hw = tuple(math.ceil(x / multiple_of) * multiple_of for x in hw)
     return new_hw
+
+
+## loop内でconfigを変更する場合
+def modify_config(config, **kwargs):
+    """
+    引数として渡されたパラメータに応じて、configの値を動的に変更する関数。
+    ネストされたキーはドット区切りで指定する。
+    
+    Args:
+        config (DictConfig): 元の設定を含むconfigオブジェクト
+        **kwargs: 変更するパラメータ。ネストされたキーはドットで区切る
+    
+    Example:
+        modify_config(config, dataset__delta_t_ms=20, dataset__augmentation__prob_hflip=0.3)
+    """
+    for key, value in kwargs.items():
+        keys = key.split('__')  # ネストされたキーはドットで区切って指定
+        target = config
+        for subkey in keys[:-1]:  # 最後のキー以外を順にたどる
+            target = target.get(subkey)
+            if target is None:
+                raise KeyError(f"Configに指定されたキー '{subkey}' が存在しません")
+        
+        # 最後のキーに対応する値を書き換え
+        target[keys[-1]] = value
+    return config
