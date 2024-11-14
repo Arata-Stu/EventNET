@@ -14,7 +14,7 @@ class PropheseeEvaluator:
 
     def __init__(self, dataset: str, downsample_by_2: bool):
         super().__init__()
-        assert dataset in {'gen1', 'gen4'}
+        assert dataset in {'gen1', 'gen4', 'dsec'}
         self.dataset = dataset
         self.downsample_by_2 = downsample_by_2
 
