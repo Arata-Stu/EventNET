@@ -25,6 +25,8 @@ configs = [OmegaConf.load(path) for path in config_paths]
 merged_conf = OmegaConf.merge(*configs)
 dynamically_modify_train_config(config=merged_conf)
 
+t_ms = merged_conf.dataset.tau_ms
+
 # データとモデルを設定
 data = fetch_data_module(config=merged_conf)
 model = fetch_model_module(config=merged_conf)
@@ -37,7 +39,7 @@ pred_model.eval()
 model_type = merged_conf.model.type
 save_sequence_with_pred(
     dataloader=data.val_dataloader(),
-    t_ms=100,
+    t_ms=t_ms,
     output_file=args.output_file,
     model=pred_model,
     conf_thre=0.1,
