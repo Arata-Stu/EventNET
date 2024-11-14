@@ -166,7 +166,7 @@ def process_sequence(args):
     output_dir_last = get_last_dir_name(output_dir)
 
     # 完全な出力ディレクトリを組み立て
-    full_output_dir = os.path.join(output_dir, split, seq, f"tau={tau_ms}_dt={delta_t_ms}")
+    full_output_dir = os.path.join(output_dir, f"tau={tau_ms}_dt={delta_t_ms}", split, seq)
     os.makedirs(full_output_dir, exist_ok=True)
 
     sequence_dir = os.path.join(data_dir, split, seq)

@@ -31,10 +31,10 @@ class SequenceDataset(Dataset):
                 index_path = os.path.join(root, 'index.json')
                 with open(index_path, 'r') as f:
                     entries = json.load(f)
-                    # パスは結合のみで絶対パス化
                     for entry in entries:
-                        entry['event_file'] = os.path.join(self.data_dir, entry['event_file'])
-                        entry['label_file'] = os.path.join(self.data_dir, entry['label_file']) if entry['label_file'] else None
+                        # 変更点: データセットディレクトリを指定して完全なパスに更新
+                        entry['event_file'] = os.path.join(root, entry['event_file'])
+                        entry['label_file'] = os.path.join(root, entry['label_file']) if entry['label_file'] else None
                     index_entries.extend(entries)
         return index_entries
 
