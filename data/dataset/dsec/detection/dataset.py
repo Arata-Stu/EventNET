@@ -3,10 +3,6 @@ import yaml
 from torch.utils.data import ConcatDataset
 from .sequence import SequenceDataset
 
-import os
-import yaml
-from torch.utils.data import ConcatDataset
-
 class DSECConcatDataset(ConcatDataset):
     def __init__(self, base_data_dir: str, mode: str, tau: int, delta_t: int, 
                  sequence_length: int = 1, guarantee_label: bool = False, transform=None, config_path: str = None):
@@ -36,17 +32,22 @@ class DSECConcatDataset(ConcatDataset):
         
         split_sequences = config['splits'].get(mode, [])
         
-        # tau と delta_t に対応するサブディレクトリを含む SequenceDataset を作成
+        # tau と delta_t の組み合わせディレクトリを取得
+        tau_delta_dir = f"tau={self.tau}_dt={self.delta_t}"
+        tau_delta_path = os.path.join(self.base_data_dir, tau_delta_dir)
+
+        if not os.path.isdir(tau_delta_path):
+            raise ValueError(f"The directory for tau={self.tau} and delta_t={self.delta_t} does not exist in {self.base_data_dir}")
+        
+        # tau_delta_path の下にある各シーケンスに対応する `SequenceDataset` を生成
         datasets = []
         for sequence in split_sequences:
-            sequence_path = os.path.join(self.base_data_dir, sequence)
-            tau_delta_dir = f"tau={self.tau}_dt={self.delta_t}"
-            full_path = os.path.join(sequence_path, tau_delta_dir)
+            sequence_path = os.path.join(tau_delta_path, sequence)
                 
-            if os.path.isdir(full_path):
+            if os.path.isdir(sequence_path):
                 datasets.append(
                     SequenceDataset(
-                        data_dir=full_path,
+                        data_dir=sequence_path,
                         sequence_length=self.sequence_length,
                         guarantee_label=self.guarantee_label,
                         transform=transform,

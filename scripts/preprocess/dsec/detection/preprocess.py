@@ -60,15 +60,20 @@ def create_event_histogram(slice_events, frame_shape: Tuple[int, int], bins: int
 
 # 各シーケンスの処理
 def process_sequence(args):
-    data_dir, output_dir, representation_type, bins,  seq, tau_ms, delta_t_ms, frame_shape = args
+    data_dir, output_dir, representation_type, bins, seq, tau_ms, delta_t_ms, frame_shape = args
 
     # tau_ms と delta_t_ms をマイクロ秒に変換
     tau_us = tau_ms * 1000
     delta_t_us = delta_t_ms * 1000
 
-    seq_output_dir = os.path.join(output_dir, seq, f"tau={tau_ms}_dt={delta_t_ms}")
+    # 出力ディレクトリを `tau` と `delta_t` の組み合わせで分ける
+    tau_delta_dir = f"tau={tau_ms}_dt={delta_t_ms}"
+    seq_output_dir = os.path.join(output_dir, tau_delta_dir, seq)
+    os.makedirs(seq_output_dir, exist_ok=True)
     
-    print(f"Processing sequence: {seq}")
+    print(f"Processing sequence: {seq} with tau={tau_ms} and delta_t={delta_t_ms}")
+    
+    # イベントデータと検出データのパス
     event_path = os.path.join(data_dir, seq, 'events', 'left', 'events.h5')
     detection_path = os.path.join(data_dir, seq, 'object_detections', 'left', 'tracks.npy')
 
@@ -100,7 +105,6 @@ def process_sequence(args):
             ('track_id', 'int32')
         ])
 
-    os.makedirs(seq_output_dir, exist_ok=True)
     start_time = events['t'][0]
     end_time = events['t'][-1]
     window_starts = np.arange(start_time, end_time, tau_us)
@@ -113,9 +117,9 @@ def process_sequence(args):
 
         timestamp_str = f"{int(start)}_to_{int(end)}"
         event_file_name = f"{timestamp_str}_event.npz"
-        event_save_name = os.path.join(seq_output_dir, f"{timestamp_str}_event.npz")
+        event_save_name = os.path.join(seq_output_dir, event_file_name)
         label_file_name = f"{timestamp_str}_label.npz"
-        label_save_name = os.path.join(seq_output_dir, f"{timestamp_str}_label.npz")
+        label_save_name = os.path.join(seq_output_dir, label_file_name)
 
         if os.path.exists(event_save_name) and os.path.exists(label_save_name):
             continue
@@ -136,24 +140,18 @@ def process_sequence(args):
         else:
             raise ValueError(f"Unknown representation type: {representation_type}")
 
-
-
         # イベントフレームを保存
         np.savez_compressed(event_save_name, events=event_frame)
 
+        # ラベル保存処理
         if detections.size > 0:
-            # タイムウィンドウ内の検出データを取得
             det_mask = (detections['t'] >= start_range) & (detections['t'] < end)
             slice_detections = detections[det_mask]
-
             labels = []
-            unique_track_ids = np.unique(slice_detections['track_id'])
-            
-            for track_id in unique_track_ids:
-                # 同じtrack_idを持つ検出データをフィルタし、タイムスタンプが最大のものを取得
-                track_detections = slice_detections[slice_detections['track_id'] == track_id]
-                latest_detection = track_detections[np.argmax(track_detections['t'])]  # タイムスタンプが最大のものを取得
 
+            for track_id in np.unique(slice_detections['track_id']):
+                track_detections = slice_detections[slice_detections['track_id'] == track_id]
+                latest_detection = track_detections[np.argmax(track_detections['t'])]
                 labels.append({
                     't': latest_detection['t'],
                     'x': latest_detection['x'],
@@ -165,13 +163,12 @@ def process_sequence(args):
                     'track_id': latest_detection['track_id']
                 })
 
-            # ラベルを圧縮保存
             np.savez_compressed(label_save_name, labels=labels)
             has_label = True
         else:
             labels = []
             has_label = False
-            label_file_name = None  # ラベルがない場合
+            label_file_name = None
 
         # インデックスにエントリ追加
         index_entry = {
