@@ -15,16 +15,16 @@ parameters:
   param2:
     delta_t_ms: 10
     tau_ms: 100
-  param2:
+  param3:
     delta_t_ms: 20
     tau_ms: 100
-  param2:
+  param4:
     delta_t_ms: 33
     tau_ms: 100
-  param2:
+  param5:
     delta_t_ms: 50
     tau_ms: 100
-  param2:
+  param6:
     delta_t_ms: 100
     tau_ms: 100
   
