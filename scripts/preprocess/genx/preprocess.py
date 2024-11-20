@@ -162,10 +162,7 @@ def process_sequence(args):
     tau_us = tau_ms * 1000
     delta_t_us = delta_t_ms * 1000
 
-    # output_dirの最後のディレクトリ名を取得
-    output_dir_last = get_last_dir_name(output_dir)
-
-    # 完全な出力ディレクトリを組み立て
+    # 出力ディレクトリの設定
     full_output_dir = os.path.join(output_dir, f"tau={tau_ms}_dt={delta_t_ms}", split, seq)
     os.makedirs(full_output_dir, exist_ok=True)
 
@@ -176,7 +173,14 @@ def process_sequence(args):
     bbox_path = os.path.join(sequence_dir, bbox_file)
 
     # インデックスリストの初期化
-    index_list = []
+    index_file_path = os.path.join(full_output_dir, 'index.json')
+    if os.path.exists(index_file_path):
+        with open(index_file_path, 'r') as index_file:
+            index_list = json.load(index_file)
+    else:
+        index_list = []
+
+    existing_timestamps = set(tuple(entry['timestamp']) for entry in index_list)
 
     with h5py.File(event_path, 'r') as f:
         events = {
@@ -201,6 +205,24 @@ def process_sequence(args):
         data_start = t - delta_t_us
         data_end = t
 
+        timestamp_tuple = (int(data_start), int(data_end))
+        timestamp_str = f"{timestamp_tuple[0]}_to_{timestamp_tuple[1]}"
+        event_file_name = f"{timestamp_str}_event.npz"
+        event_save_path = os.path.join(full_output_dir, event_file_name)
+        label_file_name = f"{timestamp_str}_label.npz"
+        label_save_path = os.path.join(full_output_dir, label_file_name)
+
+        # 既存のタイムスタンプを確認
+        if timestamp_tuple in existing_timestamps:
+            print(f"Skipping window {timestamp_str} as it is already processed.")
+            continue
+
+        # イベントファイルの存在を確認
+        if os.path.exists(event_save_path):
+            print(f"Skipping window {timestamp_str} as event file already exists.")
+            continue
+
+        # イベントのスライスを取得
         start_idx = np.searchsorted(events['t'], data_start)
         end_idx = np.searchsorted(events['t'], data_end)
 
@@ -211,6 +233,7 @@ def process_sequence(args):
             'p': events['p'][start_idx:end_idx],
         }
 
+        # ラベルの処理
         if detections.size > 0:
             label_mask = (detections['t'] >= (t - tau_us / 2)) & (detections['t'] < (t + tau_us / 2))
             slice_detections = detections[label_mask]
@@ -260,38 +283,29 @@ def process_sequence(args):
         else:
             raise ValueError(f"Unknown representation type: {representation_type}")
 
-        # ファイル名の定義
-        timestamp_str = f"{int(data_start)}_to_{int(data_end)}"
-        event_file_name = f"{timestamp_str}_event.npz"
-        event_save_path = os.path.join(full_output_dir, event_file_name)
-        label_file_name = f"{timestamp_str}_label.npz"
-        label_save_path = os.path.join(full_output_dir, label_file_name)
-
         # イベントファイルを保存
-        if not os.path.exists(event_save_path):
+        if not os.path.exists(label_save_path):
             np.savez_compressed(event_save_path, events=event_frame)
 
-        # ラベルが存在する場合のみラベルファイルを保存
-        if labels:
-            
-            if not os.path.exists(label_save_path):
-                np.savez_compressed(label_save_path, labels=labels)
+        # ラベルファイルを保存（存在する場合）
+        if labels and not os.path.exists(label_save_path):
+            np.savez_compressed(label_save_path, labels=labels)
 
-
-        # ファイル名のみをindex.jsonに保存
+        # インデックスエントリを追加
         index_entry = {
             'event_file': event_file_name,
             'label_file': label_file_name if labels else None,
-            'timestamp': (int(data_start), int(data_end))
+            'timestamp': timestamp_tuple
         }
         index_list.append(index_entry)
+        existing_timestamps.add(timestamp_tuple)
 
-    # インデックスファイルをJSON形式で保存
-    index_file_path = os.path.join(full_output_dir, 'index.json')
+    # インデックスファイルを保存
     with open(index_file_path, 'w') as index_file:
         json.dump(index_list, index_file)
 
     print(f"Completed processing sequence: {seq} in split: {split}")
+
 
 def main(config):
     input_dir = config.input_dir
