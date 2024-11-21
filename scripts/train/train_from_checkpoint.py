@@ -1,3 +1,6 @@
+import sys
+sys.path.append('./../../')
+
 import yaml
 from omegaconf import OmegaConf
 from config.modifier import dynamically_modify_train_config
