@@ -2,6 +2,7 @@ from omegaconf import DictConfig
 
 from .backbone.darknet import CSPDarknet
 from .backbone.rvt import RVT
+from .backbone.sast import SAST
 from .neck.pafpn import PAFPN
 from .head.yolox_head import YOLOXHead
 def build_backbone(backbone_config: DictConfig):
@@ -17,6 +18,9 @@ def build_backbone(backbone_config: DictConfig):
     elif name == 'RVT':
         print('RVT')
         backbone = RVT(mdl_config=backbone_config)
+    elif name=='SAST':
+        print('SAST')
+        backbone = SAST(mdl_config=backbone_config)
     else:
         NotImplementedError
     
