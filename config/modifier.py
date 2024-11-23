@@ -23,6 +23,7 @@ def dynamically_modify_train_config(config: DictConfig):
         multiple_of = 32 * partition_split_32
         mdl_hw = _get_modified_hw_multiple_of(hw=dataset_hw, multiple_of=multiple_of)
         dataset_cfg.target_size = mdl_hw
+        mdl_cfg.backbone.in_res_hw = mdl_hw
 
         #　入力データに応じて、次元を設定
         if dataset_cfg.ev_representation == 'event_frame':
@@ -45,6 +46,20 @@ def dynamically_modify_train_config(config: DictConfig):
             backbone_cfg = mdl_cfg.backbone
             backbone_name = backbone_cfg.name
             if backbone_name in {'RVT'}:
+            
+                attention_cfg = backbone_cfg.stage.attention
+                partition_size = tuple(x // (32 * partition_split_32) for x in mdl_hw)
+                assert (mdl_hw[0] // 32) % partition_size[0] == 0, f'{mdl_hw[0]=}, {partition_size[0]=}'
+                assert (mdl_hw[1] // 32) % partition_size[1] == 0, f'{mdl_hw[1]=}, {partition_size[1]=}'
+                print(f'Set partition sizes: {partition_size}')
+                attention_cfg.partition_size = partition_size
+            else:
+                print(f'{backbone_name=} not available')
+                raise NotImplementedError
+        elif 'sast' in mdl_name:  # 'rvt' が含まれているかどうかで判定
+            backbone_cfg = mdl_cfg.backbone
+            backbone_name = backbone_cfg.name
+            if backbone_name in {'SAST'}:
             
                 attention_cfg = backbone_cfg.stage.attention
                 partition_size = tuple(x // (32 * partition_split_32) for x in mdl_hw)
