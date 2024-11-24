@@ -76,7 +76,8 @@ def create_event_histogram(slice_events, frame_shape: Tuple[int, int], bins: int
 
     # イベントが空の場合
     if len(slice_events['x']) == 0:
-        return representation.reshape(-1, height, width)
+        # HWCH形式にリシェイプ
+        return representation.transpose(2, 3, 0, 1).reshape(height, width, -1)
 
     # 正規化した時間インデックスの計算
     t0 = slice_events['t'][0]
@@ -95,7 +96,9 @@ def create_event_histogram(slice_events, frame_shape: Tuple[int, int], bins: int
         for b, xi, yi in zip(bin_indices, x_clipped, y_clipped):
             representation[p, b, yi, xi] += 1
 
-    return representation.reshape(-1, height, width)
+    # HWCH形式にリシェイプ
+    return representation.transpose(2, 3, 0, 1).reshape(height, width, -1)
+
 
 
 def conservative_bbox_filter(labels: np.ndarray) -> np.ndarray:

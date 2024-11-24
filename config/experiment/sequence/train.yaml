@@ -14,11 +14,11 @@ experiment:
 
   dataset:
     train:
-      num_workers: 8
+      num_workers: 1
       batch_size: 8
     val:
-      num_workers: 8
+      num_workers: 1
       batch_size: 1
     test:
-      num_workers: 8
+      num_workers: 1
       batch_size: 1

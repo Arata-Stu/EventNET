@@ -4,7 +4,7 @@ input_dir: ${oc.env:DATA_DIR, /default/path}
 output_dir: ${oc.env:DEST_DIR, /default/path}
 num_processors: ${oc.env:NUM_PROCESS, 1}
 
-representation_type: frame # histogram or frame
+representation_type: histogram # histogram or frame
 bins: 10 # for histogram
 
 tau_ms: 100       # イベントを取得する間隔（ミリ秒）
