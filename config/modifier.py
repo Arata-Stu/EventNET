@@ -45,7 +45,7 @@ def dynamically_modify_train_config(config: DictConfig):
         if 'rvt' in mdl_name:  # 'rvt' が含まれているかどうかで判定
             backbone_cfg = mdl_cfg.backbone
             backbone_name = backbone_cfg.name
-            if backbone_name in {'RVT'}:
+            if backbone_name in {'RVT', 'RVT-SSM'}:
             
                 attention_cfg = backbone_cfg.stage.attention
                 partition_size = tuple(x // (32 * partition_split_32) for x in mdl_hw)
@@ -56,7 +56,7 @@ def dynamically_modify_train_config(config: DictConfig):
             else:
                 print(f'{backbone_name=} not available')
                 raise NotImplementedError
-        elif 'sast' in mdl_name:  # 'rvt' が含まれているかどうかで判定
+        elif 'sast' in mdl_name:  # 'sast' が含まれているかどうかで判定
             backbone_cfg = mdl_cfg.backbone
             backbone_name = backbone_cfg.name
             if backbone_name in {'SAST'}:

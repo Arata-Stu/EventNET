@@ -11,7 +11,7 @@ from utils.eval.prophesee.io.box_loading import to_prophesee
 from utils.yolox_utils import postprocess, to_yolox
 
 
-class SMMModule(pl.LightningModule):
+class SSMModule(pl.LightningModule):
 
     def __init__(self, full_config: DictConfig):
         super().__init__()

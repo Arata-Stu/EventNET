@@ -5,7 +5,7 @@ from typing import Dict, Optional, Tuple
 from einops import rearrange
 
 from .lstm import DWSConvLSTM2d
-from models.s5.s5_model import S5Block
+from ..s5.s5_model import S5Block
 from .attention import MaxVitAttentionPairCl
 from ..layers.downsampling import get_downsample_layer_Cf2Cl, nhwC_2_nChw
 
@@ -78,7 +78,7 @@ class RVTSSMStage(nn.Module):
         super().__init__()
         assert isinstance(num_blocks, int) and num_blocks > 0
         downsample_cfg = stage_cfg.downsample
-        lstm_cfg = stage_cfg.lstm
+        # lstm_cfg = stage_cfg.lstm
         attention_cfg = stage_cfg.attention
 
         self.downsample_cf2cl = get_downsample_layer_Cf2Cl(

@@ -1,6 +1,6 @@
 model:
   name: rvt-ssm-t
-  type: smm
+  type: ssm
   
   backbone:
     name: RVT-SSM

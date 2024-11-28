@@ -12,7 +12,7 @@ def build_model(model_config: DictConfig):
     elif 'rvt' in name:
         print('rvt')
         model = RVTYOLOX(model_config=model_config)
-        pass
+        
     elif 'sast' in name:
         print('sast')
         model = SASTYOLOX(model_config=model_config)
